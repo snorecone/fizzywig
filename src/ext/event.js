@@ -2,10 +2,16 @@ function event_normalize(callback) {
   return function(evt) {
     if (!evt) evt = window.event;
     
-    if (!evt.preventDefault) {
+    if (!('defaultPrevented' in evt)) {
+      evt.defaultPrevented = false;
+      
+      var preventDefault = evt.preventDefault;
+      
       evt.preventDefault = function() {
-        evt.returnValue = false;
-      }
+        this.defaultPrevented = true;
+        this.returnValue = false;
+        preventDefault.call(this);
+      };
     }
     
     evt.target = evt.target || evt.srcElement;
