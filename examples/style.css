@@ -17,6 +17,20 @@ body {
   color: #333;
 }
 
+.toolbar ul {
+  float: left;
+  margin-bottom: 10px;
+}
+
+.toolbar li {
+  float: left;
+  margin-right: 2px;
+}
+
+.content {
+  clear: both;
+}
+
 .content h1 {
   font-size: 1.429em;
   line-height: 2.2em;
@@ -38,3 +52,81 @@ body {
 .content strike {
   text-decoration: strikethrough;
 }
+
+.toolbar button {
+  background: white;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f6f6f6), color-stop(100%, #c9c9c9));
+  background-image: -webkit-linear-gradient(#f6f6f6, #c9c9c9);
+  background-image: -moz-linear-gradient(#f6f6f6, #c9c9c9);
+  background-image: -o-linear-gradient(#f6f6f6, #c9c9c9);
+  background-image: -ms-linear-gradient(#f6f6f6, #c9c9c9);
+  background-image: linear-gradient(#f6f6f6, #c9c9c9);
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  -o-background-clip: padding-box;
+  -ms-background-clip: padding-box;
+  -khtml-background-clip: padding-box;
+  background-clip: padding-box;
+  border: #8a8f99 1px solid;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: white 0 1px 0;
+  -webkit-box-shadow: white 0 1px 0;
+  -o-box-shadow: white 0 1px 0;
+  box-shadow: white 0 1px 0;
+  color: #293e66;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 1em;
+  margin: 0;
+  height: 22px;
+  padding: 0;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: white 0 1px 0; 
+}
+
+.toolbar button:active, .toolbar button.active {
+  background: #d8d8d8;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #666666), color-stop(100%, #999999));
+  background-image: -webkit-linear-gradient(#666666, #999999);
+  background-image: -moz-linear-gradient(#666666, #999999);
+  background-image: -o-linear-gradient(#666666, #999999);
+  background-image: -ms-linear-gradient(#666666, #999999);
+  background-image: linear-gradient(#666666, #999999);
+  border-color: #666666; 
+  color: #fff;
+  text-shadow: none;
+}
+
+.toolbar button:disabled, .toolbar button.disabled {
+  background: white;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f0f3f7), color-stop(100%, #ffffff));
+  background-image: -webkit-linear-gradient(#f0f3f7, #ffffff);
+  background-image: -moz-linear-gradient(#f0f3f7, #ffffff);
+  background-image: -o-linear-gradient(#f0f3f7, #ffffff);
+  background-image: -ms-linear-gradient(#f0f3f7, #ffffff);
+  background-image: linear-gradient(#f0f3f7, #ffffff);
+  -moz-box-shadow: white 0 1px 0 inset;
+  -webkit-box-shadow: white 0 1px 0 inset;
+  -o-box-shadow: white 0 1px 0 inset;
+  box-shadow: white 0 1px 0 inset;
+  border-color: #afbbc3;
+  color: #8f9bb3;
+  cursor: not-allowed;
+  font-style: italic;
+  text-shadow: none; 
+}
+
+.toolbar button span {
+  display: block;
+  margin-top: -2px;
+  padding: 0 8px;
+}
+
