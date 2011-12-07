@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>fizzywig example</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../fizzywig.js"></script>
+</head>
+<body>
+  <div id="wrap">
+    <div class="toolbar">
+      <form action="#" data-content-editor>
+        <ul>
+          <li><button data-content-editor-command="bold">bold</button></li>
+          <li><button data-content-editor-command="italic">italic</button></li>
+          <li><button data-content-editor-command="strikeThrough">strikethrough</button></li>
+          <li><button data-content-editor-command="underline">underline</button></li>
+        </ul>
+      </form>
+    </div>
+    
+    <div class="content" data-content-editable="faq.answer_html">
+      <h1>Hi Folks</h1>
+      
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+        enim ad minim veniam, <em>quis</em> nostrud exercitation ullamco laboris
+        nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in <strong>voluptate</strong> velit esse cillum dolore eu fugiat
+        nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+        sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+    </div>
+    
+    <div class="content" data-content-editable="faq.question_html">
+      <h1>Hi Folks</h1>
+      
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+        enim ad minim veniam, <em>quis</em> nostrud exercitation ullamco laboris
+        nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in <strong>voluptate</strong> velit esse cillum dolore eu fugiat
+        nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+        sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    // there can be many content areas, each emits a json object matching
+    // its own [data-content-editable] attribute when saved.
+    // you may select a group of these to control with one toolbar
+    var content = fizzywig.content('[data-content-editable^="faq"]'); 
+    
+    // each content group may have only one toolbar
+    content.toolbar('[data-content-editor]'); 
+    
+    // content.on('save', function(data) { alert(data) });
+    
+    // var content = fizzywig('[data-content-editable="answer_html"]'); // there can be many contents
+    // content.toolbar('[data-content-editor"]'); // only one toolbar
+    // content.on('save', function() { do jquery ajax here});
+    // content.on('blur', function() { custom leaving stuff });
+    // content.on('focus', function() { custom leaving stuff });
+    // content.on('change', function() { custom leaving stuff });
+  </script>
+  
+</body>
+</html>

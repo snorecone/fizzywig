@@ -1,0 +1,26 @@
+{
+  "name": "fizzywig",
+  "version": "0.0.1",
+  "description": "ContentEditable wysiwyg editor",
+  "keywords": [
+    "wysiwyg",
+    "contentEditable",
+    "editor",
+    "html5"
+  ],
+  "homepage": "http://owlchaos.com",
+  "author": {
+    "name": "Mark Martin",
+    "url": "http://owlchaos.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/assplecake/fizzywig.git"
+  },
+  "main": "fizzywig.js",
+  "dependencies": {
+    "uglify-js": "1.1.1",
+    "jsdom": "0.2.9",
+    "vows": "0.5.13"
+  }
+}
