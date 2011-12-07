@@ -23,10 +23,18 @@ body {
   font-weight: 700;
 }
 
-.content strong {
-  font-weight: 500;
+.content strong, .content b {
+  font-weight: 700;
 }
 
-.content em {
+.content em, .content i {
   font-style: italic;
+}
+
+.content u {
+  text-decoration: underline;
+}
+
+.content strike {
+  text-decoration: strikethrough;
 }
