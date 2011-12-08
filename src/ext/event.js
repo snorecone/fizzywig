@@ -20,3 +20,4 @@ function event_normalize(callback) {
     callback.apply(this, [evt]);
   }
 }
+

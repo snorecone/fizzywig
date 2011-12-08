@@ -21,7 +21,7 @@ function fizzy_button(node) {
     element_removeClass(node, 'active');
   };
   
-  fizzywig.emitter.on('keyup', function() {
+  fizzywig.emitter.on('keyup mouseup', function() {
     var active = document.queryCommandState(command);
     
     if (active) {

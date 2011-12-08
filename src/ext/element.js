@@ -35,3 +35,4 @@ function element_removeClass(el, klass) {
   
   el.className = classes.join(' ');
 }
+

@@ -127,6 +127,7 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'focus', emit('focus'));
   element_addEventListener(node, 'blur', emit('blur'));
   element_addEventListener(node, 'keyup', emit('keyup'));
+  element_addEventListener(node, 'mouseup', emit('mouseup'));
   
   function emit(event_type) {
     return function(e) {
@@ -160,7 +161,7 @@ function fizzy_button(node) {
     element_removeClass(node, 'active');
   };
   
-  fizzywig.emitter.on('keyup', function() {
+  fizzywig.emitter.on('keyup mouseup', function() {
     var active = document.queryCommandState(command);
     
     if (active) {
@@ -187,33 +188,45 @@ function fizzy_emitter() {
   ,   listeners = {}
   ;
   
-  emitter.on = function(evt, callback) {
-    listeners[evt] = listeners[evt] || [];
+  emitter.on = function(events, callback) {
+    events = events.split(/\s+/);
     
-    // don't create dupes
-    if (listeners[evt].indexOf(callback) === -1) {
-      listeners[evt].push(callback);
-    }
+    events.forEach(function(evt) {
+      listeners[evt] = listeners[evt] || [];
+
+      // don't create dupes
+      if (listeners[evt].indexOf(callback) === -1) {
+        listeners[evt].push(callback);
+      }
+    });
     
     return emitter;
   };
   
-  emitter.off = function(evt, callback) {
-    if (listeners[evt]) {
-      var i = listeners[evt].indexOf(callback);
+  emitter.off = function(events, callback) {
+    events = events.split(/\s+/);
+    
+    events.forEach(function(evt) {
+      if (listeners[evt]) {
+        var i = listeners[evt].indexOf(callback);
       
-      listeners[evt] = listeners[evt].slice(0, i).concat(listeners[evt].slice(i + 1));
-    }
+        listeners[evt] = listeners[evt].slice(0, i).concat(listeners[evt].slice(i + 1));
+      }
+    });
     
     return emitter;
   };
   
-  emitter.emit = function(evt, args) {
-    if (listeners[evt]) {
-      listeners[evt].forEach(function(callback) {
-        callback.apply(this, args);
-      });
-    }
+  emitter.emit = function(events, args) {
+    events = events.split(/\s+/);
+    
+    events.forEach(function(evt) {
+      if (listeners[evt]) {
+        listeners[evt].forEach(function(callback) {
+          callback.apply(this, args);
+        });
+      }
+    });
   };
   
   return emitter;
@@ -291,7 +304,9 @@ function element_removeClass(el, klass) {
   }
   
   el.className = classes.join(' ');
-}function event_normalize(callback) {
+}
+
+function event_normalize(callback) {
   return function(evt) {
     if (!evt) evt = window.event;
     
@@ -312,7 +327,9 @@ function element_removeClass(el, klass) {
     
     callback.apply(this, [evt]);
   }
-}window.fizzywig = fizzywig;
+}
+
+window.fizzywig = fizzywig;
 
 }(window));
 
