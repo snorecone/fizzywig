@@ -141,9 +141,11 @@ function fizzy_contentNode(node, content) {
 function fizzy_button(node) {
   var button = {}
   ,   command
+  ,   value
   ;
   
   command = node.getAttribute('data-content-editor-command');
+  value = node.getAttribute('data-content-editor-value');
   
   button.enable = function() {
     node.removeAttribute('disabled');
@@ -175,7 +177,7 @@ function fizzy_button(node) {
   
   function execute(e) {
     e.preventDefault();
-    document.execCommand(command, false, null);
+    document.execCommand(command, false, value);
   }
   
   return button;
