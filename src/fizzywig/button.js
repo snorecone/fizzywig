@@ -13,11 +13,28 @@ function fizzy_button(node) {
     node.setAttribute('disabled', 'disabled');
   };
   
+  button.activate = function() {
+    element_addClass(node, 'active');
+  };
+  
+  button.deactivate = function() {
+    element_removeClass(node, 'active');
+  };
+  
+  fizzywig.emitter.on('keyup', function() {
+    var active = document.queryCommandState(command);
+    
+    if (active) {
+      button.activate();
+    } else {
+      button.deactivate();
+    }
+  });
+  
   element_addEventListener(node, 'click', execute);
   
   function execute(e) {
     e.preventDefault();
-    console.log(document.activeElement)
     document.execCommand(command, false, null);
   }
   

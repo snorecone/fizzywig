@@ -14,3 +14,24 @@ function element_removeEventListener(el, evt, callback) {
   }
 }
 
+function element_addClass(el, klass) {
+  var classes = el.className.split(/\s+/);
+  
+  if (classes.indexOf(klass) === -1) {
+    classes.push(klass);
+  }
+
+  el.className = classes.join(' ');
+}
+
+function element_removeClass(el, klass) {
+  var classes = el.className.split(/\s+/)
+  ,   i       = classes.indexOf(klass)
+  ;
+  
+  if (i !== -1) {
+    classes = classes.slice(0, i).concat(classes.slice(i + 1));
+  }
+  
+  el.className = classes.join(' ');
+}

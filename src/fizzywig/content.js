@@ -43,31 +43,6 @@ fizzywig.content = function(selector_or_list) {
     
     return object_tree;
   };
-  
-  content.events = fizzy_emitter(content);
-  
-  content.events.on('focus', function() {
-    if (toolbar) {
-      toolbar.enable();
-    }
-  });
-  
-  content.events.on('blur', function() {
-    if (document.selection) {
-      range = document.selection.createRange();
-    } else {
-      range = window.getSelection();
-    }
-    
-    if (range.rangeCount > 0) {
-      range = range.getRangeAt(0);
-    }
-    
-    console.log(range);
-    
-    // window.getSelection().addRange(range)
-    // toolbar.disable();
-  });
 
   return content.enable();
 };

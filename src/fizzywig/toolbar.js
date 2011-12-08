@@ -25,6 +25,22 @@ function fizzy_toolbar(selector_or_node, content) {
     return toolbar;
   };
   
+  fizzywig.emitter.on('focus', function() {
+    toolbar.enable();
+  });
+  
+  fizzywig.emitter.on('blur', function() {
+    if (document.selection) {
+      range = document.selection.createRange();
+    } else {
+      range = window.getSelection();
+    }
+    
+    if (!range.rangeCount) {
+      toolbar.disable();
+    }    
+  });
+  
   return toolbar.disable();
 }
 

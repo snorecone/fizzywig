@@ -1,4 +1,6 @@
-function fizzy_emitter(context) {
+fizzywig.emitter = fizzy_emitter();
+
+function fizzy_emitter() {
   var emitter   = {}
   ,   listeners = {}
   ;
@@ -27,7 +29,7 @@ function fizzy_emitter(context) {
   emitter.emit = function(evt, args) {
     if (listeners[evt]) {
       listeners[evt].forEach(function(callback) {
-        callback.apply(context, args);
+        callback.apply(this, args);
       });
     }
   };

@@ -21,15 +21,14 @@ function fizzy_contentNode(node, content) {
     return object_tree;
   };
   
-  element_addEventListener(node, 'focus', focus);
-  element_addEventListener(node, 'blur', blur);
+  element_addEventListener(node, 'focus', emit('focus'));
+  element_addEventListener(node, 'blur', emit('blur'));
+  element_addEventListener(node, 'keyup', emit('keyup'));
   
-  function focus() {
-    content.events.emit('focus');
-  }
-  
-  function blur() {
-    content.events.emit('blur');
+  function emit(event_type) {
+    return function(e) {
+      fizzywig.emitter.emit(event_type);
+    }
   }
   
   return content_node.enable();

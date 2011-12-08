@@ -51,31 +51,6 @@ fizzywig.content = function(selector_or_list) {
     
     return object_tree;
   };
-  
-  content.events = fizzy_emitter(content);
-  
-  content.events.on('focus', function() {
-    if (toolbar) {
-      toolbar.enable();
-    }
-  });
-  
-  content.events.on('blur', function() {
-    if (document.selection) {
-      range = document.selection.createRange();
-    } else {
-      range = window.getSelection();
-    }
-    
-    if (range.rangeCount > 0) {
-      range = range.getRangeAt(0);
-    }
-    
-    console.log(range);
-    
-    // window.getSelection().addRange(range)
-    // toolbar.disable();
-  });
 
   return content.enable();
 };
@@ -107,6 +82,22 @@ function fizzy_toolbar(selector_or_node, content) {
     return toolbar;
   };
   
+  fizzywig.emitter.on('focus', function() {
+    toolbar.enable();
+  });
+  
+  fizzywig.emitter.on('blur', function() {
+    if (document.selection) {
+      range = document.selection.createRange();
+    } else {
+      range = window.getSelection();
+    }
+    
+    if (!range.rangeCount) {
+      toolbar.disable();
+    }    
+  });
+  
   return toolbar.disable();
 }
 
@@ -133,15 +124,14 @@ function fizzy_contentNode(node, content) {
     return object_tree;
   };
   
-  element_addEventListener(node, 'focus', focus);
-  element_addEventListener(node, 'blur', blur);
+  element_addEventListener(node, 'focus', emit('focus'));
+  element_addEventListener(node, 'blur', emit('blur'));
+  element_addEventListener(node, 'keyup', emit('keyup'));
   
-  function focus() {
-    content.events.emit('focus');
-  }
-  
-  function blur() {
-    content.events.emit('blur');
+  function emit(event_type) {
+    return function(e) {
+      fizzywig.emitter.emit(event_type);
+    }
   }
   
   return content_node.enable();
@@ -162,18 +152,37 @@ function fizzy_button(node) {
     node.setAttribute('disabled', 'disabled');
   };
   
+  button.activate = function() {
+    element_addClass(node, 'active');
+  };
+  
+  button.deactivate = function() {
+    element_removeClass(node, 'active');
+  };
+  
+  fizzywig.emitter.on('keyup', function() {
+    var active = document.queryCommandState(command);
+    
+    if (active) {
+      button.activate();
+    } else {
+      button.deactivate();
+    }
+  });
+  
   element_addEventListener(node, 'click', execute);
   
   function execute(e) {
     e.preventDefault();
-    console.log(document.activeElement)
     document.execCommand(command, false, null);
   }
   
   return button;
 }
 
-function fizzy_emitter(context) {
+fizzywig.emitter = fizzy_emitter();
+
+function fizzy_emitter() {
   var emitter   = {}
   ,   listeners = {}
   ;
@@ -202,7 +211,7 @@ function fizzy_emitter(context) {
   emitter.emit = function(evt, args) {
     if (listeners[evt]) {
       listeners[evt].forEach(function(callback) {
-        callback.apply(context, args);
+        callback.apply(this, args);
       });
     }
   };
@@ -262,7 +271,27 @@ function element_removeEventListener(el, evt, callback) {
   }
 }
 
-function event_normalize(callback) {
+function element_addClass(el, klass) {
+  var classes = el.className.split(/\s+/);
+  
+  if (classes.indexOf(klass) === -1) {
+    classes.push(klass);
+  }
+
+  el.className = classes.join(' ');
+}
+
+function element_removeClass(el, klass) {
+  var classes = el.className.split(/\s+/)
+  ,   i       = classes.indexOf(klass)
+  ;
+  
+  if (i !== -1) {
+    classes = classes.slice(0, i).concat(classes.slice(i + 1));
+  }
+  
+  el.className = classes.join(' ');
+}function event_normalize(callback) {
   return function(evt) {
     if (!evt) evt = window.event;
     
