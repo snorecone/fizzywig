@@ -2,6 +2,7 @@ function fizzy_toolbar(selector_or_node, content) {
   var toolbar = {}
   ,   node
   ,   button_list
+  ,   keepalive
   ;
   
   if (typeof selector_or_node === 'string') {
@@ -26,19 +27,35 @@ function fizzy_toolbar(selector_or_node, content) {
   };
   
   fizzywig.emitter.on('focus', function() {
+    keepalive = true;
     toolbar.enable();
   });
   
-  fizzywig.emitter.on('blur', function() {
-    if (document.selection) {
-      range = document.selection.createRange();
-    } else {
-      range = window.getSelection();
+  fizzywig.emitter.on('blur', function(e) {
+    var userSelection;
+    
+    if (window.getSelection) {
+      userSelection = window.getSelection();
+      
+      if (userSelection.rangeCount) {
+        userSelection = userSelection.getRangeAt(0);
+      }
+
+    } else if (document.selection) {
+      userSelection = document.selection.createRange();
     }
     
-    if (!range.rangeCount) {
-      toolbar.disable();
-    }    
+    keepalive = false;
+    
+    setTimeout(function() {
+      if (!keepalive) {
+        toolbar.disable();
+      }
+    }, 150);
+  });
+  
+  fizzywig.emitter.on('click', function() {
+    keepalive = true;
   });
   
   return toolbar.disable();

@@ -43,7 +43,7 @@ function fizzy_emitter() {
           callback.apply(this, args);
         });
       }
-    });
+    })
   };
   
   return emitter;

@@ -6,183 +6,6 @@ fizzywig = {
   version: '0.0.1'
 };
 
-fizzywig.content = function(selector_or_list) {
-  var content  = {}
-  ,   node_list
-  ,   toolbar
-  ,   current_range
-  ;
-  
-  if (typeof selector_or_list === 'string') {
-    node_list = document.querySelectorAll(selector_or_list);
-  } else if (selector_or_list instanceof node_list || Array.isArray(selector_or_list)) {
-    node_list = selector_or_list;
-  }
-  
-  node_list = Array.prototype.map.apply(node_list, [function(n) {
-    return fizzy_contentNode(n, content);
-  }]);
-  
-  content.toolbar = function(tb_selector) {
-    if (!arguments.length) return toolbar;
-    
-    toolbar = fizzy_toolbar(tb_selector, content);
-    return content;
-  };
-  
-  content.enable = function() {
-    node_list.forEach(function(el) { el.enable() });
-    return content;
-  };
-  
-  content.disable = function() {
-    node_list.forEach(function(el) { el.disable() });
-    return content;
-  };
-  
-  content.json = function() {
-    var object_tree = {}
-    ,   object_list = node_list.map(function(el) { return el.json() })
-    ;
-    
-    object_list.unshift(object_tree);
-    
-    object_deepMerge.apply(null, object_list);
-    
-    return object_tree;
-  };
-
-  return content.enable();
-};
-
-function fizzy_toolbar(selector_or_node, content) {
-  var toolbar = {}
-  ,   node
-  ,   button_list
-  ;
-  
-  if (typeof selector_or_node === 'string') {
-    node = document.querySelector(selector_or_node);
-  } else if (selector_or_node instanceof Element) {
-    node = selector_or_node;
-  }
-  
-  button_list = node.querySelectorAll('[data-content-editor-command]');
-  button_list = Array.prototype.map.apply(button_list, [function(el) {
-    return fizzy_button(el);
-  }]);
-  
-  toolbar.enable = function() {
-    button_list.forEach(function(button) { button.enable() });
-    return toolbar;
-  };
-  
-  toolbar.disable = function() {
-    button_list.forEach(function(button) { button.disable() });
-    return toolbar;
-  };
-  
-  fizzywig.emitter.on('focus', function() {
-    toolbar.enable();
-  });
-  
-  fizzywig.emitter.on('blur', function() {
-    if (document.selection) {
-      range = document.selection.createRange();
-    } else {
-      range = window.getSelection();
-    }
-    
-    if (!range.rangeCount) {
-      toolbar.disable();
-    }    
-  });
-  
-  return toolbar.disable();
-}
-
-function fizzy_contentNode(node, content) {
-  var content_node = {}
-  ,   object_tree  = {}
-  ,   object_attr
-  ;
-  
-  object_attr = node.getAttribute('data-content-editable') || 'data';
-  object_reach(object_tree, object_attr, node.innerHTML);
-  
-  content_node.enable = function() {
-    node.setAttribute('contentEditable', true);
-    return content_node;
-  };
-  
-  content_node.disable = function() {
-    node.removeAttribute('contentEditable');
-    return content_node;
-  };
-  
-  content_node.json = function() {
-    return object_tree;
-  };
-  
-  element_addEventListener(node, 'focus', emit('focus'));
-  element_addEventListener(node, 'blur', emit('blur'));
-  element_addEventListener(node, 'keyup', emit('keyup'));
-  element_addEventListener(node, 'mouseup', emit('mouseup'));
-  
-  function emit(event_type) {
-    return function(e) {
-      fizzywig.emitter.emit(event_type);
-    }
-  }
-  
-  return content_node.enable();
-}
-
-function fizzy_button(node) {
-  var button = {}
-  ,   command
-  ,   value
-  ;
-  
-  command = node.getAttribute('data-content-editor-command');
-  value = node.getAttribute('data-content-editor-value');
-  
-  button.enable = function() {
-    node.removeAttribute('disabled');
-  };
-  
-  button.disable = function() {
-    node.setAttribute('disabled', 'disabled');
-  };
-  
-  button.activate = function() {
-    element_addClass(node, 'active');
-  };
-  
-  button.deactivate = function() {
-    element_removeClass(node, 'active');
-  };
-  
-  fizzywig.emitter.on('keyup mouseup', function() {
-    var active = document.queryCommandState(command);
-    
-    if (active) {
-      button.activate();
-    } else {
-      button.deactivate();
-    }
-  });
-  
-  element_addEventListener(node, 'click', execute);
-  
-  function execute(e) {
-    e.preventDefault();
-    document.execCommand(command, false, value);
-  }
-  
-  return button;
-}
-
 fizzywig.emitter = fizzy_emitter();
 
 function fizzy_emitter() {
@@ -228,10 +51,241 @@ function fizzy_emitter() {
           callback.apply(this, args);
         });
       }
-    });
+    })
   };
   
   return emitter;
+}
+
+fizzywig.content = function(selector_or_list) {
+  var content  = {}
+  ,   node_list
+  ,   toolbar
+  ,   current_range
+  ,   save_timer
+  ,   content_tree = {}
+  ;
+  
+  if (typeof selector_or_list === 'string') {
+    node_list = document.querySelectorAll(selector_or_list);
+  } else if (selector_or_list instanceof node_list || Array.isArray(selector_or_list)) {
+    node_list = selector_or_list;
+  }
+  
+  node_list = Array.prototype.map.apply(node_list, [function(n) {
+    return fizzy_contentNode(n, content);
+  }]);
+  
+  content.toolbar = function(tb_selector) {
+    if (!arguments.length) return toolbar;
+    
+    toolbar = fizzy_toolbar(tb_selector, content);
+    return content;
+  };
+  
+  content.enable = function() {
+    node_list.forEach(function(el) { el.enable() });
+    return content;
+  };
+  
+  content.disable = function() {
+    node_list.forEach(function(el) { el.disable() });
+    return content;
+  };
+  
+  content.json = function() {
+    var object_tree = {}
+    ,   object_list = node_list.map(function(el) { return el.json() })
+    ;
+    
+    object_list.unshift(object_tree);
+    
+    object_deepMerge.apply(null, object_list);
+    
+    return object_tree;
+  };
+  
+  // a proxy for our emitter
+  content.on = fizzywig.emitter.on;
+  fizzywig.emitter.on('keyup change blur', startSaveTimer);
+  
+  function startSaveTimer() {
+    if (save_timer) { return; }
+    
+    save_timer = setTimeout(function() {
+      var current_content_tree = content.json();
+      
+      if (JSON.stringify(content_tree) !== JSON.stringify(current_content_tree)) {
+        fizzywig.emitter.emit('save', [current_content_tree]);
+        content_tree = current_content_tree;
+      }
+      
+      save_timer = null;
+    }, 2000);
+  }
+  
+  return content.enable();
+};
+
+function fizzy_toolbar(selector_or_node, content) {
+  var toolbar = {}
+  ,   node
+  ,   button_list
+  ,   keepalive
+  ;
+  
+  if (typeof selector_or_node === 'string') {
+    node = document.querySelector(selector_or_node);
+  } else if (selector_or_node instanceof Element) {
+    node = selector_or_node;
+  }
+  
+  button_list = node.querySelectorAll('[data-content-editor-command]');
+  button_list = Array.prototype.map.apply(button_list, [function(el) {
+    return fizzy_button(el);
+  }]);
+  
+  toolbar.enable = function() {
+    button_list.forEach(function(button) { button.enable() });
+    return toolbar;
+  };
+  
+  toolbar.disable = function() {
+    button_list.forEach(function(button) { button.disable() });
+    return toolbar;
+  };
+  
+  fizzywig.emitter.on('focus', function() {
+    keepalive = true;
+    toolbar.enable();
+  });
+  
+  fizzywig.emitter.on('blur', function(e) {
+    var userSelection;
+    
+    if (window.getSelection) {
+      userSelection = window.getSelection();
+      
+      if (userSelection.rangeCount) {
+        userSelection = userSelection.getRangeAt(0);
+      }
+
+    } else if (document.selection) {
+      userSelection = document.selection.createRange();
+    }
+    
+    keepalive = false;
+    
+    setTimeout(function() {
+      if (!keepalive) {
+        toolbar.disable();
+      }
+    }, 150);
+  });
+  
+  fizzywig.emitter.on('click', function() {
+    keepalive = true;
+  });
+  
+  return toolbar.disable();
+}
+
+function fizzy_contentNode(node, content) {
+  var content_node = {}
+  ,   object_attr
+  ;
+  
+  object_attr = node.getAttribute('data-content-editable') || 'data';
+  
+  content_node.enable = function() {
+    node.setAttribute('contentEditable', true);
+    return content_node;
+  };
+  
+  content_node.disable = function() {
+    node.removeAttribute('contentEditable');
+    return content_node;
+  };
+  
+  content_node.json = function() {
+    var object_tree = {};
+    
+    object_reach(object_tree, object_attr, node.innerHTML);
+    return object_tree;
+  };
+  
+  element_addEventListener(node, 'focus', emit('focus'));
+  element_addEventListener(node, 'blur', emit('blur'));
+  element_addEventListener(node, 'keyup', emit('keyup'));
+  element_addEventListener(node, 'mouseup', emit('mouseup'));
+  
+  function emit(event_type) {
+    return function(e) {
+      fizzywig.emitter.emit(event_type);
+    }
+  }
+  
+  return content_node.enable();
+}
+
+var fizzy_button_BLOCK_FORMATS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'];
+
+function fizzy_button(node) {
+  var button = {}
+  ,   command
+  ,   value
+  ;
+  
+  command = node.getAttribute('data-content-editor-command');
+  value = node.getAttribute('data-content-editor-value');
+  
+  button.enable = function() {
+    node.removeAttribute('disabled');
+  };
+  
+  button.disable = function() {
+    node.setAttribute('disabled', 'disabled');
+  };
+  
+  button.activate = function() {
+    element_addClass(node, 'active');
+  };
+  
+  button.deactivate = function() {
+    element_removeClass(node, 'active');
+  };
+  
+  fizzywig.emitter.on('keyup mouseup', check);
+  
+  function check() {
+    // var active_command = document.queryCommandState(command)
+    // ,   active_value   = document.queryCommandValue(command)
+    // ;
+    // console.log(active_value)
+    // // if (active) {
+    // //   button.activate();
+    // // } else {
+    // //   button.deactivate();
+    // // }
+  }
+  
+  element_addEventListener(node, 'click', execute);
+  element_addEventListener(node, 'blur', emit('blur'));
+  element_addEventListener(node, 'focus', emit('focus'));
+  
+  function emit(event_name) {
+    return function(evt) {
+      fizzywig.emitter.emit(event_name);
+    }
+  }
+  
+  function execute(e) {
+    e.preventDefault();
+    fizzywig.emitter.emit('click');
+    document.execCommand(command, false, value);
+  }
+  
+  return button;
 }
 
 function object_deepMerge() {
@@ -266,7 +320,7 @@ function object_reach(object, key, value) {
       return acc[cur] = value;
     }
     
-    return acc[cur] = acc[cur] || {};    
+    return acc[cur] || (acc[cur] = {});
   }
 }
 

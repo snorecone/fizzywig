@@ -3,6 +3,8 @@ fizzywig.content = function(selector_or_list) {
   ,   node_list
   ,   toolbar
   ,   current_range
+  ,   save_timer
+  ,   content_tree = {}
   ;
   
   if (typeof selector_or_list === 'string') {
@@ -43,7 +45,26 @@ fizzywig.content = function(selector_or_list) {
     
     return object_tree;
   };
-
+  
+  // a proxy for our emitter
+  content.on = fizzywig.emitter.on;
+  fizzywig.emitter.on('keyup change blur', startSaveTimer);
+  
+  function startSaveTimer() {
+    if (save_timer) { return; }
+    
+    save_timer = setTimeout(function() {
+      var current_content_tree = content.json();
+      
+      if (JSON.stringify(content_tree) !== JSON.stringify(current_content_tree)) {
+        fizzywig.emitter.emit('save', [current_content_tree]);
+        content_tree = current_content_tree;
+      }
+      
+      save_timer = null;
+    }, 2000);
+  }
+  
   return content.enable();
 };
 

@@ -53,6 +53,18 @@ body {
   text-decoration: strikethrough;
 }
 
+.content ul, .content ol {
+  margin-left: 25px;
+}
+
+.content ol {
+  list-style-type: decimal;
+}
+
+.content ul {
+  list-style-type: disc;
+}
+
 .toolbar button {
   background: white;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f6f6f6), color-stop(100%, #c9c9c9));

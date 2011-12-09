@@ -30,7 +30,7 @@ function object_reach(object, key, value) {
       return acc[cur] = value;
     }
     
-    return acc[cur] = acc[cur] || {};    
+    return acc[cur] || (acc[cur] = {});
   }
 }
 
