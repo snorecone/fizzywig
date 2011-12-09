@@ -3,10 +3,12 @@ function fizzy_button(node) {
   ,   command
   ,   value
   ,   active
+  ,   heading
   ;
   
   command = node.getAttribute('data-content-editor-command');
   value = node.getAttribute('data-content-editor-value');
+  heading = value && value.charAt(0).toLowerCase() === 'h';
   
   button.enable = function() {
     node.removeAttribute('disabled');
@@ -54,8 +56,12 @@ function fizzy_button(node) {
   
   function execute(e) {
     e.preventDefault();
-    fizzywig.emitter.emit('click');
-    document.execCommand(command, false, value);
+    
+    // normalize the heading buttons to toggle on/off like ul and ol
+    var toggled_value = heading && active ? 'p' : value;
+    
+    document.execCommand(command, false, toggled_value);
+    fizzywig.emitter.emit('click change');
   }
   
   return button;
@@ -66,9 +72,11 @@ var fizzy_button_BLOCK_NORMALIZATION = {
   "heading": 'h'
 };
 
+var fizzy_button_BLOCK_REGEXP = /(heading|normal)\s*/i;
+
 function fizzy_button_normalizeCommandValue(command_value) {
-  if (/(heading|normal)/i.test(command_value)) {
-    command_value = command_value.replace(/(heading|normal)\s*/i, function(match) {
+  if (fizzy_button_BLOCK_REGEXP.test(command_value)) {
+    command_value = command_value.replace(fizzy_button_BLOCK_REGEXP, function(match) {
       return fizzy_button_BLOCK_NORMALIZATION[match.trim().toLowerCase()];
     });
   }
