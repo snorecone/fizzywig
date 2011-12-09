@@ -17,6 +17,8 @@ fizzywig.js: \
 	src/fizzywig/toolbar.js \
 	src/fizzywig/content-node.js \
 	src/fizzywig/button.js \
+	src/fizzywig/range.js \
+	src/fizzywig/prompter.js \
 	src/ext/object.js \
 	src/ext/element.js \
 	src/ext/event.js \

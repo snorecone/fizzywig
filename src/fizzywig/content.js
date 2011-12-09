@@ -50,6 +50,9 @@ fizzywig.content = function(selector_or_list) {
   content.on = fizzywig.emitter.on;
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
+  // a proxy for the prompter
+  content.prompt = fizzywig.prompter.prompt;
+  
   function startSaveTimer() {
     if (save_timer) { return; }
     

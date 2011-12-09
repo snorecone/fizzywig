@@ -32,19 +32,6 @@ function fizzy_toolbar(selector_or_node, content) {
   });
   
   fizzywig.emitter.on('blur', function(e) {
-    var userSelection;
-    
-    if (window.getSelection) {
-      userSelection = window.getSelection();
-      
-      if (userSelection.rangeCount) {
-        userSelection = userSelection.getRangeAt(0);
-      }
-
-    } else if (document.selection) {
-      userSelection = document.selection.createRange();
-    }
-    
     keepalive = false;
     
     setTimeout(function() {

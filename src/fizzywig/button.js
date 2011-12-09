@@ -4,11 +4,15 @@ function fizzy_button(node) {
   ,   value
   ,   active
   ,   heading
+  ,   link
+  ,   prompt
   ;
   
   command = node.getAttribute('data-content-editor-command');
   value = node.getAttribute('data-content-editor-value');
+  prompt = node.getAttribute('data-content-editor-prompt');
   heading = value && value.charAt(0).toLowerCase() === 'h';
+  link = command.toLowerCase() === 'createlink';
   
   button.enable = function() {
     node.removeAttribute('disabled');
@@ -40,7 +44,7 @@ function fizzy_button(node) {
     } else {
       active = active_command;
     }
-        
+
     button.activate();
   }
   
@@ -57,10 +61,17 @@ function fizzy_button(node) {
   function execute(e) {
     e.preventDefault();
     
+    // normalize the link button to toggle on/off like ul and ol
+    var toggled_command = link && fizzy_range().isLink() ? 'unlink' : command;
+    
     // normalize the heading buttons to toggle on/off like ul and ol
     var toggled_value = heading && active ? 'p' : value;
     
-    document.execCommand(command, false, toggled_value);
+    if (prompt) {
+      toggled_value = fizzywig.prompter.prompt(prompt);
+    }
+    
+    document.execCommand(toggled_command, false, toggled_value);
     fizzywig.emitter.emit('click change');
   }
   

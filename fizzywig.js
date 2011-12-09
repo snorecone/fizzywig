@@ -109,6 +109,9 @@ fizzywig.content = function(selector_or_list) {
   content.on = fizzywig.emitter.on;
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
+  // a proxy for the prompter
+  content.prompt = fizzywig.prompter.prompt;
+  
   function startSaveTimer() {
     if (save_timer) { return; }
     
@@ -161,19 +164,6 @@ function fizzy_toolbar(selector_or_node, content) {
   });
   
   fizzywig.emitter.on('blur', function(e) {
-    var userSelection;
-    
-    if (window.getSelection) {
-      userSelection = window.getSelection();
-      
-      if (userSelection.rangeCount) {
-        userSelection = userSelection.getRangeAt(0);
-      }
-
-    } else if (document.selection) {
-      userSelection = document.selection.createRange();
-    }
-    
     keepalive = false;
     
     setTimeout(function() {
@@ -236,11 +226,15 @@ function fizzy_button(node) {
   ,   value
   ,   active
   ,   heading
+  ,   link
+  ,   prompt
   ;
   
   command = node.getAttribute('data-content-editor-command');
   value = node.getAttribute('data-content-editor-value');
+  prompt = node.getAttribute('data-content-editor-prompt');
   heading = value && value.charAt(0).toLowerCase() === 'h';
+  link = command.toLowerCase() === 'createlink';
   
   button.enable = function() {
     node.removeAttribute('disabled');
@@ -272,7 +266,7 @@ function fizzy_button(node) {
     } else {
       active = active_command;
     }
-        
+
     button.activate();
   }
   
@@ -289,10 +283,17 @@ function fizzy_button(node) {
   function execute(e) {
     e.preventDefault();
     
+    // normalize the link button to toggle on/off like ul and ol
+    var toggled_command = link && fizzy_range().isLink() ? 'unlink' : command;
+    
     // normalize the heading buttons to toggle on/off like ul and ol
     var toggled_value = heading && active ? 'p' : value;
     
-    document.execCommand(command, false, toggled_value);
+    if (prompt) {
+      toggled_value = fizzywig.prompter.prompt(prompt);
+    }
+    
+    document.execCommand(toggled_command, false, toggled_value);
     fizzywig.emitter.emit('click change');
   }
   
@@ -314,6 +315,47 @@ function fizzy_button_normalizeCommandValue(command_value) {
   }
   
   return command_value;
+}
+
+function fizzy_range() {
+  var selection
+  ,   range = {}
+  ;
+  
+  if (window.getSelection) {
+    selection = window.getSelection();
+    
+    if (selection.rangeCount) {
+      selection = selection.getRangeAt(0);
+    }
+
+  } else if (document.selection) {
+    selection = document.selection.createRange();
+  }
+  
+  range.isLink = function() {
+    return !!selection.startContainer.parentNode.href;
+  };
+  
+  return range;
+}fizzywig.prompter = fizzy_prompter();
+
+function fizzy_prompter() {
+  var prompts  = {}
+  ,   prompter = {}
+  ;
+  
+  prompter.prompt = function(key, fun) {
+    if (fun !== undefined) {
+      prompts[key] = fun;
+    } else {
+      if (typeof prompts[key] === 'function') {
+        return prompts[key].call(null);
+      }
+    }
+  };
+  
+  return prompter;
 }
 
 function object_deepMerge() {
