@@ -1,9 +1,8 @@
-var fizzy_button_BLOCK_FORMATS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'];
-
 function fizzy_button(node) {
   var button = {}
   ,   command
   ,   value
+  ,   active
   ;
   
   command = node.getAttribute('data-content-editor-command');
@@ -18,25 +17,29 @@ function fizzy_button(node) {
   };
   
   button.activate = function() {
-    element_addClass(node, 'active');
+    active ? element_addClass(node, 'active') : element_removeClass(node, 'active');
   };
   
-  button.deactivate = function() {
-    element_removeClass(node, 'active');
-  };
-  
-  fizzywig.emitter.on('keyup mouseup', check);
+  fizzywig.emitter.on('keyup mouseup paste change', check);
   
   function check() {
-    // var active_command = document.queryCommandState(command)
-    // ,   active_value   = document.queryCommandValue(command)
-    // ;
-    // console.log(active_value)
-    // // if (active) {
-    // //   button.activate();
-    // // } else {
-    // //   button.deactivate();
-    // // }
+    var active_command
+    ,   active_value
+    ;
+    
+    try {
+      active_command = document.queryCommandState(command);
+      active_value = document.queryCommandValue(command);
+    } catch (e) {}
+    
+    if (value) {
+      active_value = fizzy_button_normalizeCommandValue(active_value);
+      active = value === active_value;
+    } else {
+      active = active_command;
+    }
+        
+    button.activate();
   }
   
   element_addEventListener(node, 'click', execute);
@@ -56,5 +59,20 @@ function fizzy_button(node) {
   }
   
   return button;
+}
+
+var fizzy_button_BLOCK_NORMALIZATION = {
+  "normal": 'p',
+  "heading": 'h'
+};
+
+function fizzy_button_normalizeCommandValue(command_value) {
+  if (/(heading|normal)/i.test(command_value)) {
+    command_value = command_value.replace(/(heading|normal)\s*/i, function(match) {
+      return fizzy_button_BLOCK_NORMALIZATION[match.trim().toLowerCase()];
+    });
+  }
+  
+  return command_value;
 }
 

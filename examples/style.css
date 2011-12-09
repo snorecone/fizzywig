@@ -19,7 +19,7 @@ body {
 
 .toolbar ul {
   float: left;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 .toolbar li {
@@ -29,40 +29,6 @@ body {
 
 .content {
   clear: both;
-}
-
-.content h1 {
-  font-size: 1.429em;
-  line-height: 2.2em;
-  font-weight: 700;
-}
-
-.content strong, .content b {
-  font-weight: 700;
-}
-
-.content em, .content i {
-  font-style: italic;
-}
-
-.content u {
-  text-decoration: underline;
-}
-
-.content strike {
-  text-decoration: strikethrough;
-}
-
-.content ul, .content ol {
-  margin-left: 25px;
-}
-
-.content ol {
-  list-style-type: decimal;
-}
-
-.content ul {
-  list-style-type: disc;
 }
 
 .toolbar button {

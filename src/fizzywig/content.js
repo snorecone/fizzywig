@@ -48,7 +48,7 @@ fizzywig.content = function(selector_or_list) {
   
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
-  fizzywig.emitter.on('keyup change blur', startSaveTimer);
+  fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
   function startSaveTimer() {
     if (save_timer) { return; }

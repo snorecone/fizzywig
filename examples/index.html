@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>fizzywig example</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ugc.css">
   <script src="../fizzywig.js"></script>
 </head>
 <body>
@@ -28,7 +29,7 @@
       </form>
     </div>
     
-    <div class="content" data-content-editable="faq.answer_html">
+    <div class="content ugc" data-content-editable="faq.answer_html">
       <h1>Hi Folks</h1>
       
       <p>
@@ -42,7 +43,7 @@
       </p>
     </div>
     
-    <div class="content" data-content-editable="faq.question_html">
+    <div class="content ugc" data-content-editable="faq.question_html">
       <h1>Hi Folks</h1>
       
       <p>
@@ -66,7 +67,7 @@
     // each content group may have only one toolbar
     content.toolbar('[data-content-editor]'); 
     
-    content.on('save', function(data) { console.log(data) });
+    content.on('save', function(data) { /* console.log(data) */ });
     
     // var content = fizzywig('[data-content-editable="answer_html"]'); // there can be many contents
     // content.toolbar('[data-content-editor"]'); // only one toolbar

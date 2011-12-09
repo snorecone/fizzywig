@@ -26,6 +26,8 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'blur', emit('blur'));
   element_addEventListener(node, 'keyup', emit('keyup'));
   element_addEventListener(node, 'mouseup', emit('mouseup'));
+  element_addEventListener(node, 'paste', emit('paste'));
+  element_addEventListener(node, 'change', emit('change'));
   
   function emit(event_type) {
     return function(e) {
