@@ -233,7 +233,7 @@ function fizzy_button(node) {
   command = node.getAttribute('data-content-editor-command');
   value = node.getAttribute('data-content-editor-value');
   prompt = node.getAttribute('data-content-editor-prompt');
-  heading = value && value.charAt(0).toLowerCase() === 'h';
+  heading = value && value.charAt(1).toLowerCase() === 'h';
   link = command.toLowerCase() === 'createlink';
   
   button.enable = function() {
@@ -264,7 +264,7 @@ function fizzy_button(node) {
       active_value = fizzy_button_normalizeCommandValue(active_value);
       active = value === active_value;
     } else {
-      active = active_command;
+      active = active_command || (link && fizzy_range().is('a'));
     }
 
     button.activate();
@@ -284,15 +284,15 @@ function fizzy_button(node) {
     e.preventDefault();
     
     // normalize the link button to toggle on/off like ul and ol
-    var toggled_command = link && fizzy_range().isLink() ? 'unlink' : command;
+    var toggled_command = link && active ? 'unlink' : command;
     
     // normalize the heading buttons to toggle on/off like ul and ol
-    var toggled_value = heading && active ? 'p' : value;
+    var toggled_value = heading && active ? '<p>' : value;
     
-    if (prompt) {
+    if (prompt && !active) {
       toggled_value = fizzywig.prompter.prompt(prompt);
     }
-    
+
     document.execCommand(toggled_command, false, toggled_value);
     fizzywig.emitter.emit('click change');
   }
@@ -314,7 +314,7 @@ function fizzy_button_normalizeCommandValue(command_value) {
     });
   }
   
-  return command_value;
+  return '<' + command_value + '>';
 }
 
 function fizzy_range() {
@@ -333,10 +333,14 @@ function fizzy_range() {
     selection = document.selection.createRange();
   }
   
-  range.isLink = function() {
-    return !!selection.startContainer.parentNode.href;
+  range.is = function(el) {
+    return el.toLowerCase() === range.parentNode();
   };
   
+  range.parentNode = function() {
+    return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
+  };
+    
   return range;
 }fizzywig.prompter = fizzy_prompter();
 

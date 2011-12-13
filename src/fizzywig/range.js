@@ -14,9 +14,13 @@ function fizzy_range() {
     selection = document.selection.createRange();
   }
   
-  range.isLink = function() {
-    return !!selection.startContainer.parentNode.href;
+  range.is = function(el) {
+    return el.toLowerCase() === range.parentNode();
   };
   
+  range.parentNode = function() {
+    return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
+  };
+    
   return range;
 }
