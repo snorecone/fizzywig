@@ -5,6 +5,7 @@
   <title>fizzywig example</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ugc.css">
+  <script src="es5-shim.js"></script>
   <script src="../fizzywig.js"></script>
 </head>
 <body>
@@ -48,6 +49,7 @@
         sunt in culpa qui officia deserunt mollit anim id est laborum.
       </p>
     </div>
+    
   </div>
   
   <script>
@@ -60,7 +62,7 @@
     content.toolbar('[data-content-editor]'); 
     
     // tie into the editor's save event here. saves every 1 second on a change event
-    content.on('save', function(data) { /*console.log(data)*/ });
+    content.on('save', function(data) { console.log(data.faq.answer_html) });
     
     // define a prompt callback that returns a text value for a button command
     content.prompt('image', function() {
