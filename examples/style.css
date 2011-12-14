@@ -31,6 +31,10 @@ body {
   clear: both;
 }
 
+.content:focus {
+  background:#eee;
+}
+
 .toolbar button {
   background: white;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f6f6f6), color-stop(100%, #c9c9c9));

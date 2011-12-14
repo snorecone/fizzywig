@@ -42,7 +42,7 @@ function fizzy_button(node) {
       active_value = fizzy_button_normalizeCommandValue(active_value);
       active = value === active_value;
     } else {
-      active = active_command || (link && fizzy_range().is('a'));
+      active = active_command || (link && fizzywig.range.is('a'));
     }
 
     button.activate();
@@ -70,7 +70,10 @@ function fizzy_button(node) {
     if (prompt && !active) {
       toggled_value = fizzywig.prompter.prompt(prompt);
     }
-
+    
+    // restore our range since we've lost focus
+    fizzywig.range.restore();
+    
     document.execCommand(toggled_command, false, toggled_value);
     fizzywig.emitter.emit('click change');
   }

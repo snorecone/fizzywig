@@ -21,6 +21,21 @@ function fizzy_range() {
   range.parentNode = function() {
     return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
   };
-    
+  
+  range.restore = function() {
+    if (window.getSelection) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(selection);
+    } else if (document.selection && selection.select) {
+      selection.select();
+    }
+  };
+  
   return range;
 }
+
+fizzywig.range = fizzy_range();
+fizzywig.emitter.on('keyup mouseup paste change blur', function() {
+  fizzywig.range = fizzy_range();
+});

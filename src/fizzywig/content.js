@@ -29,7 +29,7 @@ fizzywig.content = function(selector_or_list) {
     
     try {
       document.execCommand('styleWithCSS', false, false);
-      document.execCommand('insertBROnReturn', false, true);
+      document.execCommand('insertBROnReturn', false, false);
       document.execCommand('enableInlineTableEditing', false, false);
       document.execCommand('enableObjectResizing', false, false);
     } catch(e) {}

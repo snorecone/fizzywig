@@ -3,8 +3,15 @@
 var fizzywig;
 
 fizzywig = {
-  version: '0.0.1'
+  version: '0.0.1',
+  block_elements: ['p', 'pre', 'Normal']
 };
+
+// heading levels
+[1, 2, 3, 4, 5, 6].forEach(function(i) {
+  fizzywig.block_elements.push('Heading ' + i);
+  fizzywig.block_elements.push('h' + i);
+});
 
 fizzywig.emitter = fizzy_emitter();
 
@@ -88,7 +95,7 @@ fizzywig.content = function(selector_or_list) {
     
     try {
       document.execCommand('styleWithCSS', false, false);
-      document.execCommand('insertBROnReturn', false, true);
+      document.execCommand('insertBROnReturn', false, false);
       document.execCommand('enableInlineTableEditing', false, false);
       document.execCommand('enableObjectResizing', false, false);
     } catch(e) {}
@@ -216,8 +223,14 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'keydown', keydown);
   
   function keydown(e) {
-    if (!document.queryCommandValue('formatBlock')) {
+    // make sure the default format is a paragraph, and not text nodes or divs
+    if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
       document.execCommand('formatBlock', false, '<p>');
+    }
+    
+    // if we're backspacing and there's no text left, don't delete the block element
+    if (e.which === 8 && !node.textContent.trim()) {
+      e.preventDefault();
     }
   }
   
@@ -272,7 +285,7 @@ function fizzy_button(node) {
       active_value = fizzy_button_normalizeCommandValue(active_value);
       active = value === active_value;
     } else {
-      active = active_command || (link && fizzy_range().is('a'));
+      active = active_command || (link && fizzywig.range.is('a'));
     }
 
     button.activate();
@@ -300,7 +313,10 @@ function fizzy_button(node) {
     if (prompt && !active) {
       toggled_value = fizzywig.prompter.prompt(prompt);
     }
-
+    
+    // restore our range since we've lost focus
+    fizzywig.range.restore();
+    
     document.execCommand(toggled_command, false, toggled_value);
     fizzywig.emitter.emit('click change');
   }
@@ -348,9 +364,24 @@ function fizzy_range() {
   range.parentNode = function() {
     return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
   };
-    
+  
+  range.restore = function() {
+    if (window.getSelection) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(selection);
+    } else if (document.selection && selection.select) {
+      selection.select();
+    }
+  };
+  
   return range;
-}fizzywig.prompter = fizzy_prompter();
+}
+
+fizzywig.range = fizzy_range();
+fizzywig.emitter.on('keyup mouseup paste change blur', function() {
+  fizzywig.range = fizzy_range();
+});fizzywig.prompter = fizzy_prompter();
 
 function fizzy_prompter() {
   var prompts  = {}
