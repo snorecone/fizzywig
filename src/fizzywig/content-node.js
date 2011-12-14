@@ -21,18 +21,18 @@ function fizzy_contentNode(node, content) {
     object_reach(object_tree, object_attr, node.innerHTML);
     return object_tree;
   };
+    
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
+  element_addEventListener(node, 'keydown', keydown);
   
-  element_addEventListener(node, 'focus', emit('focus'));
-  element_addEventListener(node, 'blur', emit('blur'));
-  element_addEventListener(node, 'keyup', emit('keyup'));
-  element_addEventListener(node, 'mouseup', emit('mouseup'));
-  element_addEventListener(node, 'paste', emit('paste'));
-  element_addEventListener(node, 'change', emit('change'));
-  
-  function emit(event_type) {
-    return function(e) {
-      fizzywig.emitter.emit(event_type);
+  function keydown(e) {
+    if (!document.queryCommandValue('formatBlock')) {
+      document.execCommand('formatBlock', false, '<p>');
     }
+  }
+  
+  function emit(e) {
+    fizzywig.emitter.emit(e.type, [e]);
   }
   
   return content_node.enable();

@@ -51,7 +51,7 @@ function fizzy_emitter() {
           callback.apply(this, args);
         });
       }
-    })
+    });
   };
   
   return emitter;
@@ -85,6 +85,14 @@ fizzywig.content = function(selector_or_list) {
   
   content.enable = function() {
     node_list.forEach(function(el) { el.enable() });
+    
+    try {
+      document.execCommand('styleWithCSS', false, false);
+      document.execCommand('insertBROnReturn', false, true);
+      document.execCommand('enableInlineTableEditing', false, false);
+      document.execCommand('enableObjectResizing', false, false);
+    } catch(e) {}
+    
     return content;
   };
   
@@ -203,18 +211,18 @@ function fizzy_contentNode(node, content) {
     object_reach(object_tree, object_attr, node.innerHTML);
     return object_tree;
   };
+    
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
+  element_addEventListener(node, 'keydown', keydown);
   
-  element_addEventListener(node, 'focus', emit('focus'));
-  element_addEventListener(node, 'blur', emit('blur'));
-  element_addEventListener(node, 'keyup', emit('keyup'));
-  element_addEventListener(node, 'mouseup', emit('mouseup'));
-  element_addEventListener(node, 'paste', emit('paste'));
-  element_addEventListener(node, 'change', emit('change'));
-  
-  function emit(event_type) {
-    return function(e) {
-      fizzywig.emitter.emit(event_type);
+  function keydown(e) {
+    if (!document.queryCommandValue('formatBlock')) {
+      document.execCommand('formatBlock', false, '<p>');
     }
+  }
+  
+  function emit(e) {
+    fizzywig.emitter.emit(e.type, [e]);
   }
   
   return content_node.enable();
@@ -398,20 +406,28 @@ function object_reach(object, key, value) {
   }
 }
 
-function element_addEventListener(el, evt, callback, capture) {
-  if (el.addEventListener) {
-    el.addEventListener(evt, event_normalize.apply(this, [callback]), capture || false); 
-  } else if (el.attachEvent) {
-    el.attachEvent('on' + evt, event_normalize.apply(this, [callback]));
-  }
+function element_addEventListener(el, events, callback, capture) {
+  events = events.split(/\s+/);
+  
+  events.forEach(function(evt) {
+    if (el.addEventListener) {
+      el.addEventListener(evt, event_normalize.apply(this, [callback]), capture || false); 
+    } else if (el.attachEvent) {
+      el.attachEvent('on' + evt, event_normalize.apply(this, [callback]));
+    }
+  });
 }
 
-function element_removeEventListener(el, evt, callback) {
-  if (el.addEventListener) {
-    el.removeEventListener(evt, event_normalize.apply(this, [callback])); 
-  } else if (el.attachEvent) {
-    el.detachEvent('on' + evt, event_normalize.apply(this, [callback]));
-  }
+function element_removeEventListener(el, events, callback) {
+  events = events.split(/\s+/);
+  
+  events.forEach(function(evt) {
+    if (el.addEventListener) {
+      el.removeEventListener(evt, event_normalize.apply(this, [callback])); 
+    } else if (el.attachEvent) {
+      el.detachEvent('on' + evt, event_normalize.apply(this, [callback]));
+    }
+  });
 }
 
 function element_addClass(el, klass) {
