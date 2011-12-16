@@ -1,6 +1,8 @@
 fizzywig = {
   version: '0.0.1',
-  block_elements: ['p', 'pre', 'Normal']
+  block_elements: ['p', 'pre', 'Normal'],
+  inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
+  void_elements: ['img', 'br', 'hr']
 };
 
 // heading levels

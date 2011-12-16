@@ -4,7 +4,9 @@ var fizzywig;
 
 fizzywig = {
   version: '0.0.1',
-  block_elements: ['p', 'pre', 'Normal']
+  block_elements: ['p', 'pre', 'Normal'],
+  inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
+  void_elements: ['img', 'br', 'hr']
 };
 
 // heading levels
@@ -198,6 +200,7 @@ function fizzy_toolbar(selector_or_node, content) {
 function fizzy_contentNode(node, content) {
   var content_node = {}
   ,   object_attr
+  ,   pasting
   ;
   
   object_attr = node.getAttribute('data-content-editable') || 'data';
@@ -221,6 +224,7 @@ function fizzy_contentNode(node, content) {
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
   element_addEventListener(node, 'keydown', keydown);
+  element_addEventListener(node, 'paste', paste);
   
   function keydown(e) {
     // make sure the default format is a paragraph, and not text nodes or divs
@@ -232,6 +236,12 @@ function fizzy_contentNode(node, content) {
     if (e.which === 8 && !node.textContent.trim()) {
       e.preventDefault();
     }
+  }
+  
+  function paste(e) {
+    setTimeout(function() {
+      node.innerHTML = fizzywig.sanitizer(node.innerHTML, 'paste');
+    }, 1);
   }
   
   function emit(e) {
@@ -401,6 +411,33 @@ function fizzy_prompter() {
   return prompter;
 }
 
+fizzywig.sanitizer = function(html, policy) {
+  if (typeof html_sanitizer === 'undefined') return html;
+  console.log(html)
+  return html_sanitizer.sanitizeWithPolicy(html, fizzywig.sanitizer.policies[policy]);
+};
+
+fizzywig.sanitizer.policies = {
+  paste: function(tag_name, attributes) {
+    if (fizzywig.sanitizer.paste_elements.indexOf(tag_name) !== -1) {
+      return html_sanitizer.sanitizeAttribs(
+        tag_name, attributes, fizzywig.sanitizer.policies.uri, fizzywig.sanitizer.policies.tokens);
+    }
+  },
+  
+  uri: function(uri) {
+    return uri;
+  },
+  
+  tokens: function(val) {
+    return null;
+  }
+};
+
+// object for building our paste policy
+// add block, inline and void elements
+fizzywig.sanitizer.paste_elements = 
+  fizzywig.block_elements.concat(fizzywig.inline_elements, fizzywig.void_elements);
 function object_deepMerge() {
   var args = Array.prototype.slice.apply(arguments);
   

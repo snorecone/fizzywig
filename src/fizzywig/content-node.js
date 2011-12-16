@@ -1,6 +1,7 @@
 function fizzy_contentNode(node, content) {
   var content_node = {}
   ,   object_attr
+  ,   pasting
   ;
   
   object_attr = node.getAttribute('data-content-editable') || 'data';
@@ -24,6 +25,7 @@ function fizzy_contentNode(node, content) {
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
   element_addEventListener(node, 'keydown', keydown);
+  element_addEventListener(node, 'paste', paste);
   
   function keydown(e) {
     // make sure the default format is a paragraph, and not text nodes or divs
@@ -35,6 +37,12 @@ function fizzy_contentNode(node, content) {
     if (e.which === 8 && !node.textContent.trim()) {
       e.preventDefault();
     }
+  }
+  
+  function paste(e) {
+    setTimeout(function() {
+      node.innerHTML = fizzywig.sanitizer(node.innerHTML, 'paste');
+    }, 1);
   }
   
   function emit(e) {

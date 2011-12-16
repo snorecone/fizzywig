@@ -19,6 +19,7 @@ fizzywig.js: \
 	src/fizzywig/button.js \
 	src/fizzywig/range.js \
 	src/fizzywig/prompter.js \
+	src/fizzywig/sanitizer.js \
 	src/ext/object.js \
 	src/ext/element.js \
 	src/ext/event.js \
