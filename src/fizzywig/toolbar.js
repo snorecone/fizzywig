@@ -14,7 +14,9 @@ function fizzy_toolbar(selector_or_node, content) {
   button_list = node.querySelectorAll('[data-content-editor-command]');
   button_list = Array.prototype.map.apply(button_list, [function(el) {
     return fizzy_button(el);
-  }]);
+  }]).filter(function(el) {
+    return !!el;
+  });
   
   toolbar.enable = function() {
     button_list.forEach(function(button) { button.enable() });
@@ -22,7 +24,7 @@ function fizzy_toolbar(selector_or_node, content) {
   };
   
   toolbar.disable = function() {
-    button_list.forEach(function(button) { button.disable() });
+    button_list.forEach(function(button) { console.log(button); /*button.disable()*/ });
     return toolbar;
   };
   
