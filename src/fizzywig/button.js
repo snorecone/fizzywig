@@ -6,24 +6,10 @@ function fizzy_button(node) {
   prompt  = node.getAttribute('data-content-editor-prompt');
   key     = value || command;
   
-  if (fizzy_button.types.hasOwnProperty(key)) {
-    return new fizzy_button.types[key](node, command, value, prompt);
+  if (FizzyButton.types.hasOwnProperty(key)) {
+    return FizzyButton.create(key, node, command, value, prompt);
   }
 }
-
-fizzy_button.types = {
-  'insertImage': FizzyVoidButton,
-  'createLink': FizzyLinkButton
-};
-
-var i = 6;
-while (i--) {
-  fizzy_button.types['<h' + i + '>'] = FizzyHeadingButton;
-}
-
-['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline'].forEach(function(f) {
-  fizzy_button.types[f] = FizzyInlineButton;
-});
 
 function FizzyButton(node, command, value, prompt) {
   this.node    = node;
@@ -33,12 +19,34 @@ function FizzyButton(node, command, value, prompt) {
   this.active  = false;
 }
 
+FizzyButton.types = {
+  'insertimage': FizzyVoidButton,
+  'createlink': FizzyLinkButton
+};
+
+var i = 7;
+while (--i) {
+  FizzyButton.types['<h' + i + '>'] = FizzyHeadingButton;
+}
+
+['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline'].forEach(function(f) {
+  FizzyButton.types[f] = FizzyInlineButton;
+});
+
+FizzyButton.create = function(key, node, command, value, prompt) {
+  var button = new FizzyButton.types[key](node, command, value, prompt);
+  return button.init();
+};
+
 var fb_proto = FizzyButton.prototype;
 fb_proto.init = function() {
-  fizzywig.emitter.on('keyup mouseup paste change', this.check);
-  element_addEventListener(this.node, 'click', this.execute);
+  var button = this;
+  fizzywig.emitter.on('keyup mouseup paste change', function() { button.check() });
+  element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
   element_addEventListener(this.node, 'blur', FizzyButton.emit('blur'));
   element_addEventListener(this.node, 'focus', FizzyButton.emit('focus'));
+
+  return this;
 };
 
 fb_proto.enable = function() {
@@ -156,7 +164,9 @@ flb_proto.check = function() {
   this.activate();
 };
 
-flb_proto.execute = function() {
+flb_proto.execute = function(e) {
+  e.preventDefault();
+  
   // normalize the link button to toggle on/off like ul and ol
   var toggled_command = this.active ? 'unlink' : this.command
   ,   value           = fizzywig.prompter.prompt(this.prompt)
@@ -182,7 +192,9 @@ fvb_proto.check = function() {
   // no need to do anything
 };
 
-fvb_proto.execute = function() {
+fvb_proto.execute = function(e) {
+  e.preventDefault();
+  
   // restore our range since we've lost focus
   fizzywig.range.restore();
   
