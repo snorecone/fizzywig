@@ -9,7 +9,7 @@ fizzywig.content = function(selector_or_list) {
   
   if (typeof selector_or_list === 'string') {
     node_list = document.querySelectorAll(selector_or_list);
-  } else if (selector_or_list instanceof node_list || Array.isArray(selector_or_list)) {
+  } else if (selector_or_list instanceof NodeList || Array.isArray(selector_or_list)) {
     node_list = selector_or_list;
   }
   
@@ -20,7 +20,7 @@ fizzywig.content = function(selector_or_list) {
   content.toolbar = function(tb_selector) {
     if (!arguments.length) return toolbar;
     
-    toolbar = fizzy_toolbar(tb_selector, content);
+    toolbar = fizzy_toolbar(tb_selector);
     return content;
   };
   
@@ -48,7 +48,6 @@ fizzywig.content = function(selector_or_list) {
     ;
     
     object_list.unshift(object_tree);
-    
     object_deepMerge.apply(null, object_list);
     
     return object_tree;

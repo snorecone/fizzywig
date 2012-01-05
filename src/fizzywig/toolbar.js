@@ -1,4 +1,4 @@
-function fizzy_toolbar(selector_or_node, content) {
+function fizzy_toolbar(selector_or_node) {
   var toolbar = {}
   ,   node
   ,   button_list

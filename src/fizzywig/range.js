@@ -28,26 +28,34 @@ function fizzy_range() {
     }
   };
   
-  range.restore = function() {
+  range.restore = function(with_parent) {
     if (window.getSelection) {
       var sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(selection);
+      
+      if (with_parent) {
+        var r = document.createRange();
+        r.selectNode(selection.startContainer.parentNode);
+        sel.addRange(r);
+      }
+      
     } else if (document.selection && selection.select) {
       selection.select();
     }
   };
   
-  range.insert = function(html) {
+  range.insert = function(node) {
     if (window.getSelection) {
       var sel = window.getSelection();
       if (sel.getRangeAt && sel.rangeCount) {
         var range = sel.getRangeAt(0);
         range.deleteContents();
-        range.insertNode( document.createTextNode(html) );
+        range.insertNode(node);
       }
     } else if (document.selection && document.selection.createRange) {
-      document.selection.createRange().pasteHTML(html);
+      alert('incompatible for now');
+      document.selection.createRange().pasteHTML(node);
     }
   };
   

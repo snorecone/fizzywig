@@ -78,7 +78,7 @@ fizzywig.content = function(selector_or_list) {
   
   if (typeof selector_or_list === 'string') {
     node_list = document.querySelectorAll(selector_or_list);
-  } else if (selector_or_list instanceof node_list || Array.isArray(selector_or_list)) {
+  } else if (selector_or_list instanceof NodeList || Array.isArray(selector_or_list)) {
     node_list = selector_or_list;
   }
   
@@ -89,7 +89,7 @@ fizzywig.content = function(selector_or_list) {
   content.toolbar = function(tb_selector) {
     if (!arguments.length) return toolbar;
     
-    toolbar = fizzy_toolbar(tb_selector, content);
+    toolbar = fizzy_toolbar(tb_selector);
     return content;
   };
   
@@ -117,7 +117,6 @@ fizzywig.content = function(selector_or_list) {
     ;
     
     object_list.unshift(object_tree);
-    
     object_deepMerge.apply(null, object_list);
     
     return object_tree;
@@ -148,7 +147,7 @@ fizzywig.content = function(selector_or_list) {
   return content.enable();
 };
 
-function fizzy_toolbar(selector_or_node, content) {
+function fizzy_toolbar(selector_or_node) {
   var toolbar = {}
   ,   node
   ,   button_list
@@ -232,11 +231,11 @@ function fizzy_contentNode(node, content) {
   function keydown(e) {
     // make sure the default format is a paragraph, and not text nodes or divs
     if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
-      document.execCommand('formatBlock', false, '<p>');
+      // document.execCommand('formatBlock', false, '<p>');
     }
     
     // if we're backspacing and there's no text left, don't delete the block element
-    if (e.which === 8 && !node.innerText.trim()) {
+    if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
     }
   }
@@ -278,7 +277,7 @@ function FizzyButton(node, command, value, prompt) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
-  'insertcode': FizzyCodeButton
+  '<pre>'     : FizzyCodeButton
 };
 
 var i = 7;
@@ -371,7 +370,7 @@ fhb_proto.execute = function(e) {
   var toggled_value = this.active ? '<p>' : this.value;
 
   // restore our range since we've lost focus
-  fizzywig.range.restore();
+  fizzywig.range.restore(true);
 
   document.execCommand(this.command, false, toggled_value);
   fizzywig.emitter.emit('click change');
@@ -467,16 +466,27 @@ var fcb_proto = FizzyCodeButton.prototype = new FizzyButton();
 fvb_proto.constructor = FizzyCodeButton;
 
 fcb_proto.check = function() {
-  // no need to do anything
+  var active_value;
+
+  try {
+    active_value = document.queryCommandValue(this.command);
+  } catch (e) {}
+
+  active_value = FizzyButton.normalizeCommandValue(active_value);
+  this.active = this.value === active_value;
+  this.activate();
 };
 
 fcb_proto.execute = function(e) {
   e.preventDefault();
-  
+
+  // normalize the heading buttons to toggle on/off like ul and ol
+  var toggled_value = this.active ? '<p>' : this.value;
+
   // restore our range since we've lost focus
-  fizzywig.range.restore();
-  
-  fizzywig.range.insert('<pre>hello</pre>')
+  fizzywig.range.restore(true);
+
+  document.execCommand(this.command, false, toggled_value);
   fizzywig.emitter.emit('click change');
 };
 
@@ -510,26 +520,34 @@ function fizzy_range() {
     }
   };
   
-  range.restore = function() {
+  range.restore = function(with_parent) {
     if (window.getSelection) {
       var sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(selection);
+      
+      if (with_parent) {
+        var r = document.createRange();
+        r.selectNode(selection.startContainer.parentNode);
+        sel.addRange(r);
+      }
+      
     } else if (document.selection && selection.select) {
-      console.log(selection.select());
+      selection.select();
     }
   };
   
-  range.insert = function(html) {
+  range.insert = function(node) {
     if (window.getSelection) {
       var sel = window.getSelection();
       if (sel.getRangeAt && sel.rangeCount) {
         var range = sel.getRangeAt(0);
         range.deleteContents();
-        range.insertNode( document.createTextNode(html) );
+        range.insertNode(node);
       }
     } else if (document.selection && document.selection.createRange) {
-      document.selection.createRange().pasteHTML(html);
+      alert('incompatible for now');
+      document.selection.createRange().pasteHTML(node);
     }
   };
   
