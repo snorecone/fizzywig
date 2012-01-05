@@ -34,7 +34,7 @@ function fizzy_contentNode(node, content) {
     }
     
     // if we're backspacing and there's no text left, don't delete the block element
-    if (e.which === 8 && !node.textContent.trim()) {
+    if (e.which === 8 && !node.innerText.trim()) {
       e.preventDefault();
     }
   }

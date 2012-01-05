@@ -21,7 +21,8 @@ function FizzyButton(node, command, value, prompt) {
 
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
-  'createlink': FizzyLinkButton
+  'createlink': FizzyLinkButton,
+  'insertcode': FizzyCodeButton
 };
 
 var i = 7;
@@ -199,6 +200,27 @@ fvb_proto.execute = function(e) {
   fizzywig.range.restore();
   
   document.execCommand(this.command, false, fizzywig.prompter.prompt(this.prompt));
+  fizzywig.emitter.emit('click change');
+};
+
+function FizzyCodeButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var fcb_proto = FizzyCodeButton.prototype = new FizzyButton();
+fvb_proto.constructor = FizzyCodeButton;
+
+fcb_proto.check = function() {
+  // no need to do anything
+};
+
+fcb_proto.execute = function(e) {
+  e.preventDefault();
+  
+  // restore our range since we've lost focus
+  fizzywig.range.restore();
+  
+  fizzywig.range.insert('<pre>hello</pre>')
   fizzywig.emitter.emit('click change');
 };
 

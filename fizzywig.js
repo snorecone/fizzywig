@@ -53,6 +53,7 @@ function fizzy_emitter() {
   
   emitter.emit = function(events, args) {
     events = events.split(/\s+/);
+    args   = args || [];
     
     events.forEach(function(evt) {
       if (listeners[evt]) {
@@ -235,7 +236,7 @@ function fizzy_contentNode(node, content) {
     }
     
     // if we're backspacing and there's no text left, don't delete the block element
-    if (e.which === 8 && !node.textContent.trim()) {
+    if (e.which === 8 && !node.innerText.trim()) {
       e.preventDefault();
     }
   }
@@ -276,7 +277,8 @@ function FizzyButton(node, command, value, prompt) {
 
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
-  'createlink': FizzyLinkButton
+  'createlink': FizzyLinkButton,
+  'insertcode': FizzyCodeButton
 };
 
 var i = 7;
@@ -457,6 +459,27 @@ fvb_proto.execute = function(e) {
   fizzywig.emitter.emit('click change');
 };
 
+function FizzyCodeButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var fcb_proto = FizzyCodeButton.prototype = new FizzyButton();
+fvb_proto.constructor = FizzyCodeButton;
+
+fcb_proto.check = function() {
+  // no need to do anything
+};
+
+fcb_proto.execute = function(e) {
+  e.preventDefault();
+  
+  // restore our range since we've lost focus
+  fizzywig.range.restore();
+  
+  fizzywig.range.insert('<pre>hello</pre>')
+  fizzywig.emitter.emit('click change');
+};
+
 function fizzy_range() {
   var selection
   ,   range = {}
@@ -478,7 +501,13 @@ function fizzy_range() {
   };
   
   range.parentNode = function() {
-    return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
+    if (selection) {
+      if (window.getSelection) {
+        return selection.startContainer.parentNode.nodeName.toLowerCase();
+      } else {
+        return selection.parentElement().nodeName.toLowerCase();
+      }
+    }
   };
   
   range.restore = function() {
@@ -487,17 +516,31 @@ function fizzy_range() {
       sel.removeAllRanges();
       sel.addRange(selection);
     } else if (document.selection && selection.select) {
-      selection.select();
+      console.log(selection.select());
+    }
+  };
+  
+  range.insert = function(html) {
+    if (window.getSelection) {
+      var sel = window.getSelection();
+      if (sel.getRangeAt && sel.rangeCount) {
+        var range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode( document.createTextNode(html) );
+      }
+    } else if (document.selection && document.selection.createRange) {
+      document.selection.createRange().pasteHTML(html);
     }
   };
   
   return range;
 }
 
-fizzywig.range = fizzy_range();
 fizzywig.emitter.on('keyup mouseup paste change blur', function() {
   fizzywig.range = fizzy_range();
-});fizzywig.prompter = fizzy_prompter();
+});
+
+fizzywig.prompter = fizzy_prompter();
 
 function fizzy_prompter() {
   var prompts  = {}
@@ -637,7 +680,7 @@ function event_normalize(callback) {
       evt.preventDefault = function() {
         this.defaultPrevented = true;
         this.returnValue = false;
-        preventDefault.call(this);
+        preventDefault && preventDefault.call(this);
       };
     }
     

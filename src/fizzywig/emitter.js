@@ -36,6 +36,7 @@ function fizzy_emitter() {
   
   emitter.emit = function(events, args) {
     events = events.split(/\s+/);
+    args   = args || [];
     
     events.forEach(function(evt) {
       if (listeners[evt]) {

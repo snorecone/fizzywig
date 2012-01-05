@@ -10,7 +10,7 @@ function event_normalize(callback) {
       evt.preventDefault = function() {
         this.defaultPrevented = true;
         this.returnValue = false;
-        preventDefault.call(this);
+        preventDefault && preventDefault.call(this);
       };
     }
     

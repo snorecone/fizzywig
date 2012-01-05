@@ -19,7 +19,13 @@ function fizzy_range() {
   };
   
   range.parentNode = function() {
-    return selection && selection.startContainer.parentNode.nodeName.toLowerCase();
+    if (selection) {
+      if (window.getSelection) {
+        return selection.startContainer.parentNode.nodeName.toLowerCase();
+      } else {
+        return selection.parentElement().nodeName.toLowerCase();
+      }
+    }
   };
   
   range.restore = function() {
@@ -32,10 +38,23 @@ function fizzy_range() {
     }
   };
   
+  range.insert = function(html) {
+    if (window.getSelection) {
+      var sel = window.getSelection();
+      if (sel.getRangeAt && sel.rangeCount) {
+        var range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode( document.createTextNode(html) );
+      }
+    } else if (document.selection && document.selection.createRange) {
+      document.selection.createRange().pasteHTML(html);
+    }
+  };
+  
   return range;
 }
 
-fizzywig.range = fizzy_range();
 fizzywig.emitter.on('keyup mouseup paste change blur', function() {
   fizzywig.range = fizzy_range();
 });
+
