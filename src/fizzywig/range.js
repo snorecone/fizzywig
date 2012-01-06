@@ -36,7 +36,9 @@ function fizzy_range() {
       
       if (with_parent) {
         var r = document.createRange();
-        r.selectNode(selection.startContainer.parentNode);
+        var a = range.commonAncestor();
+                
+        r.selectNode(a);
         sel.addRange(r);
       }
       
@@ -45,18 +47,23 @@ function fizzy_range() {
     }
   };
   
-  range.insert = function(node) {
-    if (window.getSelection) {
-      var sel = window.getSelection();
-      if (sel.getRangeAt && sel.rangeCount) {
-        var range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(node);
-      }
-    } else if (document.selection && document.selection.createRange) {
-      alert('incompatible for now');
-      document.selection.createRange().pasteHTML(node);
+  range.commonAncestor = function() {
+    var a = selection.commonAncestorContainer;
+    
+    if (a.nodeType === 3) {
+      a = a.parentNode;
     }
+    
+    return a;
+  }
+  
+  range.selectNode = function(node) {
+    var r = document.createRange();
+    var sel = window.getSelection();
+    
+    sel.removeAllRanges();
+    r.selectNode(node);
+    sel.addRange(r);
   };
   
   return range;

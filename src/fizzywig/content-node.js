@@ -28,14 +28,30 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'paste', paste);
   
   function keydown(e) {
-    // make sure the default format is a paragraph, and not text nodes or divs
-    if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
-      // document.execCommand('formatBlock', false, '<p>');
-    }
-    
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
+      return;
+    }
+    
+    // normalize this bullshit in pre elements. when you hit the enter key,
+    // you should create a new paragraph below the pre that you are in.
+    if (e.which === 13 && !e.shiftKey) {
+      var n = fizzywig.range.commonAncestor();
+
+      if (n.nodeName.toLowerCase() === 'pre') {
+        var end = document.createTextNode('\00');
+
+        n.parentNode.insertBefore(end, n.nextSibling);
+        fizzywig.range.selectNode(end);
+        
+        document.execCommand('formatBlock', false, '<p>');
+      }
+    }
+    
+    // make sure the default format is a paragraph, and not text nodes or divs
+    if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
+      document.execCommand('formatBlock', false, '<p>');
     }
   }
   
