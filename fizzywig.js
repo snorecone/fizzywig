@@ -111,6 +111,16 @@ fizzywig.content = function(selector_or_list) {
     return content;
   };
   
+  content.focus = function() {
+    node_list.forEach(function(el) { el.focus() });
+    return content;
+  };
+  
+  content.blur = function() {
+    node_list.forEach(function(el) { el.blur() });
+    return content;
+  };
+  
   content.json = function() {
     var object_tree = {}
     ,   object_list = node_list.map(function(el) { return el.json() })
@@ -126,22 +136,34 @@ fizzywig.content = function(selector_or_list) {
   content.on = fizzywig.emitter.on;
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
+  fizzywig.emitter.on('focus', function() {
+    content.focus();
+  });
+  
+  fizzywig.emitter.on('blur', function() {
+    content.blur();
+  });
+  
   // a proxy for the prompter
   content.prompt = fizzywig.prompter.prompt;
   
   function startSaveTimer() {
     if (save_timer) { return; }
     
-    save_timer = setTimeout(function() {
-      var current_content_tree = content.json();
+    var current_content_tree = content.json();
+    
+    // do we have any real changes?
+    if (JSON.stringify(content_tree) !== JSON.stringify(current_content_tree)) {
       
-      if (JSON.stringify(content_tree) !== JSON.stringify(current_content_tree)) {
-        fizzywig.emitter.emit('save', [current_content_tree]);
-        content_tree = current_content_tree;
-      }
+      // let's let someone know
+      fizzywig.emitter.emit('dirty');
       
-      save_timer = null;
-    }, 2000);
+      // save in 2 seconds
+      save_timer = setTimeout(function() {
+        fizzywig.emitter.emit('save', [content_tree = content.json()]);
+        save_timer = null;
+      }, 2000);
+    }
   }
   
   return content.enable();
@@ -217,16 +239,36 @@ function fizzy_contentNode(node, content) {
     return content_node;
   };
   
+  content_node.focus = function() {
+    element_addClass(node, 'fizzy-active');
+    return content_node;
+  };
+  
+  content_node.blur = function() {
+    element_removeClass(node, 'fizzy-active');
+    return content_node;
+  };
+  
   content_node.json = function() {
     var object_tree = {};
     
-    object_reach(object_tree, object_attr, node.innerHTML);
+    object_reach(object_tree, object_attr, (node.innerHTML || '').trim());
     return object_tree;
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
   element_addEventListener(node, 'keydown', keydown);
   element_addEventListener(node, 'paste', paste);
+  element_addEventListener(node, 'mouseover', mouseover);
+  element_addEventListener(node, 'mouseout', mouseout);
+  
+  function mouseover(e) {
+    element_addClass(node, 'fizzy-hover');
+  }
+  
+  function mouseout(e) {
+    element_removeClass(node, 'fizzy-hover');
+  }
   
   function keydown(e) {
     // if we're backspacing and there's no text left, don't delete the block element
@@ -405,7 +447,7 @@ fib_proto.check = function() {
   var active_command;
 
   try {
-    active_command = document.queryCommandState(command);
+    active_command = document.queryCommandState(this.command);
   } catch (e) {}
 
   this.active = active_command;

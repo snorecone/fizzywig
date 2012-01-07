@@ -16,16 +16,36 @@ function fizzy_contentNode(node, content) {
     return content_node;
   };
   
+  content_node.focus = function() {
+    element_addClass(node, 'fizzy-active');
+    return content_node;
+  };
+  
+  content_node.blur = function() {
+    element_removeClass(node, 'fizzy-active');
+    return content_node;
+  };
+  
   content_node.json = function() {
     var object_tree = {};
     
-    object_reach(object_tree, object_attr, node.innerHTML);
+    object_reach(object_tree, object_attr, (node.innerHTML || '').trim());
     return object_tree;
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
   element_addEventListener(node, 'keydown', keydown);
   element_addEventListener(node, 'paste', paste);
+  element_addEventListener(node, 'mouseover', mouseover);
+  element_addEventListener(node, 'mouseout', mouseout);
+  
+  function mouseover(e) {
+    element_addClass(node, 'fizzy-hover');
+  }
+  
+  function mouseout(e) {
+    element_removeClass(node, 'fizzy-hover');
+  }
   
   function keydown(e) {
     // if we're backspacing and there's no text left, don't delete the block element

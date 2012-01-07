@@ -134,7 +134,7 @@ fib_proto.check = function() {
   var active_command;
 
   try {
-    active_command = document.queryCommandState(command);
+    active_command = document.queryCommandState(this.command);
   } catch (e) {}
 
   this.active = active_command;
