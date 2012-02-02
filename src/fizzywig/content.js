@@ -7,6 +7,9 @@ fizzywig.content = function(selector_or_list) {
   ,   content_tree = {}
   ;
   
+  // clear events first
+  fizzywig.emitter.clear();
+  
   if (typeof selector_or_list === 'string') {
     node_list = document.querySelectorAll(selector_or_list);
   } else if (selector_or_list instanceof NodeList || Array.isArray(selector_or_list)) {
@@ -63,8 +66,18 @@ fizzywig.content = function(selector_or_list) {
     return object_tree;
   };
   
-  // a proxy for our emitter
-  content.on = fizzywig.emitter.on;
+  content.data = function() {
+    
+  };
+  
+  content.toggleHTML = function() {
+    node_list.forEach(function(el) { el.toggleHTML() });
+  };
+  
+  fizzywig.emitter.on('keyup mouseup paste change blur', function() {
+    fizzywig.range = fizzy_range();
+  });
+  
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
   fizzywig.emitter.on('focus', function() {
@@ -74,6 +87,13 @@ fizzywig.content = function(selector_or_list) {
   fizzywig.emitter.on('blur', function() {
     content.blur();
   });
+  
+  fizzywig.emitter.on('toggle', function() {
+    content.toggleHTML();
+  });
+  
+  // a proxy for our emitter
+  content.on = fizzywig.emitter.on;
   
   // a proxy for the prompter
   content.prompt = fizzywig.prompter.prompt;

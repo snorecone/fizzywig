@@ -17,12 +17,15 @@ function FizzyButton(node, command, value, prompt) {
   this.value   = value;
   this.prompt  = prompt;
   this.active  = false;
+  this.nodeTarget = node && node.nodeName.toLowerCase() === 'option' ? node.parentElement : node;
 }
 
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
-  '<pre>'     : FizzyCodeButton
+  '<pre>': FizzyCodeButton,
+  '<p>': FizzyHeadingButton,
+  'togglehtml': FizzyHTMLButton
 };
 
 var i = 7;
@@ -30,7 +33,7 @@ while (--i) {
   FizzyButton.types['<h' + i + '>'] = FizzyHeadingButton;
 }
 
-['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline'].forEach(function(f) {
+['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline', 'indent', 'outdent'].forEach(function(f) {
   FizzyButton.types[f] = FizzyInlineButton;
 });
 
@@ -43,23 +46,44 @@ var fb_proto = FizzyButton.prototype;
 fb_proto.init = function() {
   var button = this;
   fizzywig.emitter.on('keyup mouseup paste change', function() { button.check() });
-  element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
-  element_addEventListener(this.node, 'blur', FizzyButton.emit('blur'));
-  element_addEventListener(this.node, 'focus', FizzyButton.emit('focus'));
+  element_addEventListener(this.nodeTarget, 'blur', FizzyButton.emit('blur'));
+  element_addEventListener(this.nodeTarget, 'focus', FizzyButton.emit('focus'));
+  
+  if (this.isChild()) {
+    element_addEventListener(this.nodeTarget, 'change', function(e) { button.execute(e) });
+  } else {
+    element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
+  }
 
   return this;
 };
 
+fb_proto.isChild = function() {
+  return this.node !== this.nodeTarget;
+};
+
 fb_proto.enable = function() {
-  this.node.removeAttribute('disabled');
+  this.nodeTarget.removeAttribute('disabled');
 };
 
 fb_proto.disable = function() {
-  this.node.setAttribute('disabled', 'disabled');
+  this.nodeTarget.setAttribute('disabled', 'disabled');
 };
 
 fb_proto.activate = function() {
-  this.active ? element_addClass(this.node, 'active') : element_removeClass(this.node, 'active');
+  if (this.active) {
+    element_addClass(this.nodeTarget, 'active');
+    
+    if (this.isChild()) {
+      this.node.setAttribute('selected', 'selected');
+    }
+  } else {
+    element_removeClass(this.nodeTarget, 'active');
+    
+    if (this.isChild()) {
+      this.node.removeAttribute('selected');
+    }
+  }
 };
 
 
@@ -89,6 +113,7 @@ FizzyButton.normalizeCommandValue = function(command_value) {
 
 
 
+// Headings can be options or buttons
 function FizzyHeadingButton() {
   FizzyButton.apply(this, arguments);
 }
@@ -111,14 +136,13 @@ fhb_proto.check = function() {
 fhb_proto.execute = function(e) {
   e.preventDefault();
 
-  // normalize the heading buttons to toggle on/off like ul and ol
-  var toggled_value = this.active ? '<p>' : this.value;
+  if (this.isChild() && this.nodeTarget.value === this.node.value) {
+    // restore our range since we've lost focus
+    fizzywig.range.restore(true);
 
-  // restore our range since we've lost focus
-  fizzywig.range.restore(true);
-
-  document.execCommand(this.command, false, toggled_value);
-  fizzywig.emitter.emit('click change');
+    document.execCommand(this.command, false, this.value);
+    fizzywig.emitter.emit('click change');
+  }
 };
 
 
@@ -233,5 +257,24 @@ fcb_proto.execute = function(e) {
 
   document.execCommand(this.command, false, toggled_value);
   fizzywig.emitter.emit('click change');
+};
+
+
+
+function FizzyHTMLButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var fhtml_proto = FizzyHTMLButton.prototype = new FizzyButton();
+fhtml_proto.constructor = FizzyHTMLButton;
+
+fhtml_proto.check = function() {
+  // no need to do anything
+};
+
+fhtml_proto.execute = function(e) {
+  e.preventDefault();
+  
+  fizzywig.emitter.emit('click change toggle');
 };
 

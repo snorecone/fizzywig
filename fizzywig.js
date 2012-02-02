@@ -64,6 +64,12 @@ function fizzy_emitter() {
     });
   };
   
+  emitter.clear = function() {
+    listeners = {};
+    
+    return emitter;
+  };
+  
   return emitter;
 }
 
@@ -75,6 +81,9 @@ fizzywig.content = function(selector_or_list) {
   ,   save_timer
   ,   content_tree = {}
   ;
+  
+  // clear events first
+  fizzywig.emitter.clear();
   
   if (typeof selector_or_list === 'string') {
     node_list = document.querySelectorAll(selector_or_list);
@@ -132,8 +141,18 @@ fizzywig.content = function(selector_or_list) {
     return object_tree;
   };
   
-  // a proxy for our emitter
-  content.on = fizzywig.emitter.on;
+  content.data = function() {
+    
+  };
+  
+  content.toggleHTML = function() {
+    node_list.forEach(function(el) { el.toggleHTML() });
+  };
+  
+  fizzywig.emitter.on('keyup mouseup paste change blur', function() {
+    fizzywig.range = fizzy_range();
+  });
+  
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
   fizzywig.emitter.on('focus', function() {
@@ -143,6 +162,13 @@ fizzywig.content = function(selector_or_list) {
   fizzywig.emitter.on('blur', function() {
     content.blur();
   });
+  
+  fizzywig.emitter.on('toggle', function() {
+    content.toggleHTML();
+  });
+  
+  // a proxy for our emitter
+  content.on = fizzywig.emitter.on;
   
   // a proxy for the prompter
   content.prompt = fizzywig.prompter.prompt;
@@ -225,9 +251,16 @@ function fizzy_contentNode(node, content) {
   var content_node = {}
   ,   object_attr
   ,   pasting
+  ,   textarea
   ;
   
   object_attr = node.getAttribute('data-content-editable') || 'data';
+  
+  textarea = document.createElement('textarea');
+  textarea.setAttribute('style', 'display:none;');
+  textarea.setAttribute('class', 'fizzy-raw');
+  
+  node.parentNode.insertBefore(textarea, node.nextSibling);
   
   content_node.enable = function() {
     node.setAttribute('contentEditable', true);
@@ -241,6 +274,10 @@ function fizzy_contentNode(node, content) {
   
   content_node.focus = function() {
     element_addClass(node, 'fizzy-active');
+    
+    fizzywig.range = fizzy_range();
+    fizzywig.range.moveToEnd(node);
+    
     return content_node;
   };
   
@@ -254,6 +291,18 @@ function fizzy_contentNode(node, content) {
     
     object_reach(object_tree, object_attr, (node.innerHTML || '').trim());
     return object_tree;
+  };
+  
+  content_node.toggleHTML = function() {
+    if (textarea.style.display === 'none') {
+      textarea.innerHTML = node.innerHTML.trim();
+      node.style.display = 'none';
+      textarea.style.display = 'block';
+    } else {
+      node.innerHTML = textarea.value.trim();
+      textarea.style.display = 'none';
+      node.style.display = 'block';
+    }    
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
@@ -330,12 +379,15 @@ function FizzyButton(node, command, value, prompt) {
   this.value   = value;
   this.prompt  = prompt;
   this.active  = false;
+  this.nodeTarget = node && node.nodeName.toLowerCase() === 'option' ? node.parentElement : node;
 }
 
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
-  '<pre>'     : FizzyCodeButton
+  '<pre>': FizzyCodeButton,
+  '<p>': FizzyHeadingButton,
+  'togglehtml': FizzyHTMLButton
 };
 
 var i = 7;
@@ -343,7 +395,7 @@ while (--i) {
   FizzyButton.types['<h' + i + '>'] = FizzyHeadingButton;
 }
 
-['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline'].forEach(function(f) {
+['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline', 'indent', 'outdent'].forEach(function(f) {
   FizzyButton.types[f] = FizzyInlineButton;
 });
 
@@ -356,23 +408,44 @@ var fb_proto = FizzyButton.prototype;
 fb_proto.init = function() {
   var button = this;
   fizzywig.emitter.on('keyup mouseup paste change', function() { button.check() });
-  element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
-  element_addEventListener(this.node, 'blur', FizzyButton.emit('blur'));
-  element_addEventListener(this.node, 'focus', FizzyButton.emit('focus'));
+  element_addEventListener(this.nodeTarget, 'blur', FizzyButton.emit('blur'));
+  element_addEventListener(this.nodeTarget, 'focus', FizzyButton.emit('focus'));
+  
+  if (this.isChild()) {
+    element_addEventListener(this.nodeTarget, 'change', function(e) { button.execute(e) });
+  } else {
+    element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
+  }
 
   return this;
 };
 
+fb_proto.isChild = function() {
+  return this.node !== this.nodeTarget;
+};
+
 fb_proto.enable = function() {
-  this.node.removeAttribute('disabled');
+  this.nodeTarget.removeAttribute('disabled');
 };
 
 fb_proto.disable = function() {
-  this.node.setAttribute('disabled', 'disabled');
+  this.nodeTarget.setAttribute('disabled', 'disabled');
 };
 
 fb_proto.activate = function() {
-  this.active ? element_addClass(this.node, 'active') : element_removeClass(this.node, 'active');
+  if (this.active) {
+    element_addClass(this.nodeTarget, 'active');
+    
+    if (this.isChild()) {
+      this.node.setAttribute('selected', 'selected');
+    }
+  } else {
+    element_removeClass(this.nodeTarget, 'active');
+    
+    if (this.isChild()) {
+      this.node.removeAttribute('selected');
+    }
+  }
 };
 
 
@@ -402,6 +475,7 @@ FizzyButton.normalizeCommandValue = function(command_value) {
 
 
 
+// Headings can be options or buttons
 function FizzyHeadingButton() {
   FizzyButton.apply(this, arguments);
 }
@@ -424,14 +498,13 @@ fhb_proto.check = function() {
 fhb_proto.execute = function(e) {
   e.preventDefault();
 
-  // normalize the heading buttons to toggle on/off like ul and ol
-  var toggled_value = this.active ? '<p>' : this.value;
+  if (this.isChild() && this.nodeTarget.value === this.node.value) {
+    // restore our range since we've lost focus
+    fizzywig.range.restore(true);
 
-  // restore our range since we've lost focus
-  fizzywig.range.restore(true);
-
-  document.execCommand(this.command, false, toggled_value);
-  fizzywig.emitter.emit('click change');
+    document.execCommand(this.command, false, this.value);
+    fizzywig.emitter.emit('click change');
+  }
 };
 
 
@@ -548,6 +621,25 @@ fcb_proto.execute = function(e) {
   fizzywig.emitter.emit('click change');
 };
 
+
+
+function FizzyHTMLButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var fhtml_proto = FizzyHTMLButton.prototype = new FizzyButton();
+fhtml_proto.constructor = FizzyHTMLButton;
+
+fhtml_proto.check = function() {
+  // no need to do anything
+};
+
+fhtml_proto.execute = function(e) {
+  e.preventDefault();
+  
+  fizzywig.emitter.emit('click change toggle');
+};
+
 function fizzy_range() {
   var selection
   ,   range = {}
@@ -571,7 +663,7 @@ function fizzy_range() {
   range.parentNode = function() {
     if (selection) {
       if (window.getSelection) {
-        return selection.startContainer.parentNode.nodeName.toLowerCase();
+        return selection.startContainer && selection.startContainer.parentNode.nodeName.toLowerCase();
       } else {
         return selection.parentElement().nodeName.toLowerCase();
       }
@@ -600,7 +692,7 @@ function fizzy_range() {
   range.commonAncestor = function() {
     var a = selection.commonAncestorContainer;
     
-    if (a.nodeType === 3) {
+    if (a && a.nodeType === 3) {
       a = a.parentNode;
     }
     
@@ -616,12 +708,26 @@ function fizzy_range() {
     sel.addRange(r);
   };
   
+  range.moveToEnd = function(node) {
+    var range, selection;
+    
+    if (document.createRange) {
+      range = document.createRange();
+      range.selectNodeContents(node);
+      range.collapse(false);
+      selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else if (document.selection) {
+      range = document.body.createTextRange();
+      range.moveToElementText(node);
+      range.collapse(false);
+      range.select();
+    }
+  };
+  
   return range;
 }
-
-fizzywig.emitter.on('keyup mouseup paste change blur', function() {
-  fizzywig.range = fizzy_range();
-});
 
 fizzywig.prompter = fizzy_prompter();
 

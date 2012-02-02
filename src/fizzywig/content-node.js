@@ -2,9 +2,16 @@ function fizzy_contentNode(node, content) {
   var content_node = {}
   ,   object_attr
   ,   pasting
+  ,   textarea
   ;
   
   object_attr = node.getAttribute('data-content-editable') || 'data';
+  
+  textarea = document.createElement('textarea');
+  textarea.setAttribute('style', 'display:none;');
+  textarea.setAttribute('class', 'fizzy-raw');
+  
+  node.parentNode.insertBefore(textarea, node.nextSibling);
   
   content_node.enable = function() {
     node.setAttribute('contentEditable', true);
@@ -18,6 +25,10 @@ function fizzy_contentNode(node, content) {
   
   content_node.focus = function() {
     element_addClass(node, 'fizzy-active');
+    
+    fizzywig.range = fizzy_range();
+    fizzywig.range.moveToEnd(node);
+    
     return content_node;
   };
   
@@ -31,6 +42,18 @@ function fizzy_contentNode(node, content) {
     
     object_reach(object_tree, object_attr, (node.innerHTML || '').trim());
     return object_tree;
+  };
+  
+  content_node.toggleHTML = function() {
+    if (textarea.style.display === 'none') {
+      textarea.innerHTML = node.innerHTML.trim();
+      node.style.display = 'none';
+      textarea.style.display = 'block';
+    } else {
+      node.innerHTML = textarea.value.trim();
+      textarea.style.display = 'none';
+      node.style.display = 'block';
+    }    
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  

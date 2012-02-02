@@ -21,7 +21,7 @@ function fizzy_range() {
   range.parentNode = function() {
     if (selection) {
       if (window.getSelection) {
-        return selection.startContainer.parentNode.nodeName.toLowerCase();
+        return selection.startContainer && selection.startContainer.parentNode.nodeName.toLowerCase();
       } else {
         return selection.parentElement().nodeName.toLowerCase();
       }
@@ -50,7 +50,7 @@ function fizzy_range() {
   range.commonAncestor = function() {
     var a = selection.commonAncestorContainer;
     
-    if (a.nodeType === 3) {
+    if (a && a.nodeType === 3) {
       a = a.parentNode;
     }
     
@@ -66,10 +66,24 @@ function fizzy_range() {
     sel.addRange(r);
   };
   
+  range.moveToEnd = function(node) {
+    var range, selection;
+    
+    if (document.createRange) {
+      range = document.createRange();
+      range.selectNodeContents(node);
+      range.collapse(false);
+      selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else if (document.selection) {
+      range = document.body.createTextRange();
+      range.moveToElementText(node);
+      range.collapse(false);
+      range.select();
+    }
+  };
+  
   return range;
 }
-
-fizzywig.emitter.on('keyup mouseup paste change blur', function() {
-  fizzywig.range = fizzy_range();
-});
 

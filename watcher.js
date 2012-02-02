@@ -1,6 +1,7 @@
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var building = false;
+var install_dir = process.env['INSTALL_DIR'];
 
 var watchdir = function(directory) {
   fs.readdir(directory, function(err, dir) {
@@ -17,6 +18,12 @@ var watchdir = function(directory) {
               build.on('exit', function(c) {
                 if (c === 0) {
                   console.log('build ok');
+                  
+                  if (install_dir) {
+                    console.log('installing to ' + install_dir);
+                    fs.unlink(install_dir + 'fizzywig.js', function(err) { console.log(err) });
+                    fs.link('./fizzywig.js', install_dir + 'fizzywig.js', function(err) { console.log(err) });
+                  }
                 }
                 
                 building = false;

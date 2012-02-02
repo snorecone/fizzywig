@@ -47,6 +47,12 @@ function fizzy_emitter() {
     });
   };
   
+  emitter.clear = function() {
+    listeners = {};
+    
+    return emitter;
+  };
+  
   return emitter;
 }
 
