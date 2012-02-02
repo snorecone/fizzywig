@@ -1,4 +1,4 @@
-function fizzy_button(node) {
+function fizzy_button(node, toolbar) {
   var key, command, value, prompt, button;
   
   command = node.getAttribute('data-content-editor-command');
@@ -7,16 +7,17 @@ function fizzy_button(node) {
   key     = value || command;
   
   if (FizzyButton.types.hasOwnProperty(key)) {
-    return FizzyButton.create(key, node, command, value, prompt);
+    return FizzyButton.create(key, node, command, value, prompt, toolbar);
   }
 }
 
-function FizzyButton(node, command, value, prompt) {
+function FizzyButton(node, command, value, prompt, toolbar) {
   this.node    = node;
   this.command = command;
   this.value   = value;
   this.prompt  = prompt;
   this.active  = false;
+  this.toolbar = toolbar;
   this.nodeTarget = node && node.nodeName.toLowerCase() === 'option' ? node.parentElement : node;
 }
 

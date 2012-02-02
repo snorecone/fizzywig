@@ -13,7 +13,7 @@ function fizzy_toolbar(selector_or_node) {
   
   button_list = node.querySelectorAll('[data-content-editor-command]');
   button_list = Array.prototype.map.apply(button_list, [function(el) {
-    return fizzy_button(el);
+    return fizzy_button(el, toolbar);
   }]).filter(function(el) {
     return !!el;
   });
