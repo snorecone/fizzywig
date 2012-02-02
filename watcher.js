@@ -21,8 +21,17 @@ var watchdir = function(directory) {
                   
                   if (install_dir) {
                     console.log('installing to ' + install_dir);
-                    fs.unlink(install_dir + 'fizzywig.js', function(err) { console.log(err) });
-                    fs.link('./fizzywig.js', install_dir + 'fizzywig.js', function(err) { console.log(err) });
+                    fs.unlink(install_dir + 'fizzywig.js', function(err) { 
+                      if (err) {
+                        console.log(err);
+                      }
+                      
+                      fs.link('./fizzywig.js', install_dir + 'fizzywig.js', function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                      });
+                    });
                   }
                 }
                 
