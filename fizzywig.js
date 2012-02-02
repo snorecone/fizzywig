@@ -98,7 +98,7 @@ fizzywig.content = function(selector_or_list) {
   content.toolbar = function(tb_selector) {
     if (!arguments.length) return toolbar;
     
-    toolbar = fizzy_toolbar(tb_selector);
+    toolbar = fizzy_toolbar(tb_selector, content);
     return content;
   };
   
@@ -145,8 +145,14 @@ fizzywig.content = function(selector_or_list) {
     
   };
   
-  content.toggleHTML = function() {
-    node_list.forEach(function(el) { el.toggleHTML() });
+  content.toggleSourceMode = function() {
+    node_list.forEach(function(el) { el.toggleSourceMode() });
+  };
+  
+  content.isSourceMode = function() {
+    return node_list.some(function(node) {
+      return node.isSourceMode();
+    });
   };
   
   fizzywig.emitter.on('keyup mouseup paste change blur', function() {
@@ -162,11 +168,7 @@ fizzywig.content = function(selector_or_list) {
   fizzywig.emitter.on('blur', function() {
     content.blur();
   });
-  
-  fizzywig.emitter.on('toggle', function() {
-    content.toggleHTML();
-  });
-  
+    
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
   
@@ -195,7 +197,7 @@ fizzywig.content = function(selector_or_list) {
   return content.enable();
 };
 
-function fizzy_toolbar(selector_or_node) {
+function fizzy_toolbar(selector_or_node, content) {
   var toolbar = {}
   ,   node
   ,   button_list
@@ -223,6 +225,14 @@ function fizzy_toolbar(selector_or_node) {
   toolbar.disable = function() {
     button_list.forEach(function(button) { button.disable() });
     return toolbar;
+  };
+  
+  toolbar.toggleSourceMode = function() {
+    content.toggleSourceMode();
+  };
+  
+  toolbar.isSourceMode = function() {
+    return content.isSourceMode();
   };
   
   fizzywig.emitter.on('focus', function() {
@@ -293,16 +303,20 @@ function fizzy_contentNode(node, content) {
     return object_tree;
   };
   
-  content_node.toggleHTML = function() {
-    if (textarea.style.display === 'none') {
-      textarea.innerHTML = node.innerHTML.trim();
-      node.style.display = 'none';
-      textarea.style.display = 'block';
-    } else {
+  content_node.toggleSourceMode = function() {
+    if (content_node.isSourceMode()) {
       node.innerHTML = textarea.value.trim();
       textarea.style.display = 'none';
       node.style.display = 'block';
-    }    
+    } else {
+      textarea.innerHTML = node.innerHTML.trim();
+      node.style.display = 'none';
+      textarea.style.display = 'block';
+    }
+  };
+  
+  content_node.isSourceMode = function() {
+    return textarea.style.display !== 'none'
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
@@ -400,8 +414,8 @@ while (--i) {
   FizzyButton.types[f] = FizzyInlineButton;
 });
 
-FizzyButton.create = function(key, node, command, value, prompt) {
-  var button = new FizzyButton.types[key](node, command, value, prompt);
+FizzyButton.create = function(key, node, command, value, prompt, toolbar) {
+  var button = new FizzyButton.types[key](node, command, value, prompt, toolbar);
   return button.init();
 };
 
@@ -632,12 +646,14 @@ var fhtml_proto = FizzyHTMLButton.prototype = new FizzyButton();
 fhtml_proto.constructor = FizzyHTMLButton;
 
 fhtml_proto.check = function() {
-  // no need to do anything
+  this.active = this.toolbar.isSourceMode();
+  this.activate();
 };
 
 fhtml_proto.execute = function(e) {
   e.preventDefault();
   
+  this.toolbar.toggleSourceMode();
   fizzywig.emitter.emit('click change toggle');
 };
 

@@ -1,4 +1,4 @@
-function fizzy_toolbar(selector_or_node) {
+function fizzy_toolbar(selector_or_node, content) {
   var toolbar = {}
   ,   node
   ,   button_list
@@ -26,6 +26,14 @@ function fizzy_toolbar(selector_or_node) {
   toolbar.disable = function() {
     button_list.forEach(function(button) { button.disable() });
     return toolbar;
+  };
+  
+  toolbar.toggleSourceMode = function() {
+    content.toggleSourceMode();
+  };
+  
+  toolbar.isSourceMode = function() {
+    return content.isSourceMode();
   };
   
   fizzywig.emitter.on('focus', function() {

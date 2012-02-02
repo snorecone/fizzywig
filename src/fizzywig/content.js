@@ -23,7 +23,7 @@ fizzywig.content = function(selector_or_list) {
   content.toolbar = function(tb_selector) {
     if (!arguments.length) return toolbar;
     
-    toolbar = fizzy_toolbar(tb_selector);
+    toolbar = fizzy_toolbar(tb_selector, content);
     return content;
   };
   
@@ -70,8 +70,14 @@ fizzywig.content = function(selector_or_list) {
     
   };
   
-  content.toggleHTML = function() {
-    node_list.forEach(function(el) { el.toggleHTML() });
+  content.toggleSourceMode = function() {
+    node_list.forEach(function(el) { el.toggleSourceMode() });
+  };
+  
+  content.isSourceMode = function() {
+    return node_list.some(function(node) {
+      return node.isSourceMode();
+    });
   };
   
   fizzywig.emitter.on('keyup mouseup paste change blur', function() {
@@ -87,11 +93,7 @@ fizzywig.content = function(selector_or_list) {
   fizzywig.emitter.on('blur', function() {
     content.blur();
   });
-  
-  fizzywig.emitter.on('toggle', function() {
-    content.toggleHTML();
-  });
-  
+    
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
   

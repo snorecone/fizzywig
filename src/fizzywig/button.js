@@ -38,8 +38,8 @@ while (--i) {
   FizzyButton.types[f] = FizzyInlineButton;
 });
 
-FizzyButton.create = function(key, node, command, value, prompt) {
-  var button = new FizzyButton.types[key](node, command, value, prompt);
+FizzyButton.create = function(key, node, command, value, prompt, toolbar) {
+  var button = new FizzyButton.types[key](node, command, value, prompt, toolbar);
   return button.init();
 };
 
@@ -270,12 +270,14 @@ var fhtml_proto = FizzyHTMLButton.prototype = new FizzyButton();
 fhtml_proto.constructor = FizzyHTMLButton;
 
 fhtml_proto.check = function() {
-  // no need to do anything
+  this.active = this.toolbar.isSourceMode();
+  this.activate();
 };
 
 fhtml_proto.execute = function(e) {
   e.preventDefault();
   
+  this.toolbar.toggleSourceMode();
   fizzywig.emitter.emit('click change toggle');
 };
 

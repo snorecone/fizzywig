@@ -44,16 +44,20 @@ function fizzy_contentNode(node, content) {
     return object_tree;
   };
   
-  content_node.toggleHTML = function() {
-    if (textarea.style.display === 'none') {
-      textarea.innerHTML = node.innerHTML.trim();
-      node.style.display = 'none';
-      textarea.style.display = 'block';
-    } else {
+  content_node.toggleSourceMode = function() {
+    if (content_node.isSourceMode()) {
       node.innerHTML = textarea.value.trim();
       textarea.style.display = 'none';
       node.style.display = 'block';
-    }    
+    } else {
+      textarea.innerHTML = node.innerHTML.trim();
+      node.style.display = 'none';
+      textarea.style.display = 'block';
+    }
+  };
+  
+  content_node.isSourceMode = function() {
+    return textarea.style.display !== 'none'
   };
     
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
