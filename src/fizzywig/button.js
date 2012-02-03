@@ -277,6 +277,18 @@ fhtml_proto.check = function() {
   this.activate();
 };
 
+fhtml_proto.activate = function() {
+  if (this.active) {
+    this.toolbar.disable();
+    this.enable();
+  } else {
+    this.toolbar.enable();
+  }
+  
+  fb_proto.activate.call(this);
+};
+
+
 fhtml_proto.execute = function(e) {
   e.preventDefault();
   
