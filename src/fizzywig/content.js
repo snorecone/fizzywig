@@ -101,9 +101,6 @@ fizzywig.content = function(selector_or_list) {
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
   
-  // a proxy for the prompter
-  content.prompt = fizzywig.prompter.prompt;
-  
   function startSaveTimer() {
     if (save_timer) { return; }
     

@@ -55,13 +55,19 @@ function fizzy_emitter() {
     events = events.split(/\s+/);
     args   = args || [];
     
+    var return_vals = {};
+    
     events.forEach(function(evt) {
       if (listeners[evt]) {
+        return_vals[evt] = [];
+        
         listeners[evt].forEach(function(callback) {
-          callback.apply(this, args);
+          return_vals[evt].push(callback.apply(this, args));
         });
       }
     });
+    
+    return return_vals;
   };
   
   emitter.clear = function() {
@@ -175,9 +181,6 @@ fizzywig.content = function(selector_or_list) {
     
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
-  
-  // a proxy for the prompter
-  content.prompt = fizzywig.prompter.prompt;
   
   function startSaveTimer() {
     if (save_timer) { return; }
@@ -580,10 +583,10 @@ flb_proto.execute = function(e) {
   if (this.active) {
     document.execCommand('unlink', false, null);
   } else {
-    var url = fizzywig.prompter.prompt(this.prompt);
+    var return_vals = fizzywig.emitter.emit(this.prompt);
 
-    if (url) {
-      document.execCommand(this.command, false, url);
+    if (return_vals[this.prompt]) {
+      document.execCommand(this.command, false, return_vals[this.prompt][0]);
     }
   }
 
@@ -605,18 +608,10 @@ fvb_proto.check = function() {
 
 fvb_proto.execute = function(e) {
   e.preventDefault();
-  
-  var html;
-  
+    
   // restore our range since we've lost focus
-  fizzywig.range.restore();
-  
-  html = fizzywig.prompter.prompt(this.prompt);
-  
-  if (html) {
-    fizzywig.range.insertHTML(html);
-  }
-  
+  fizzywig.range.restore();  
+  fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
   fizzywig.emitter.emit('click change');
 };
 
@@ -787,26 +782,6 @@ function fizzy_range() {
   };
   
   return range;
-}
-
-fizzywig.prompter = fizzy_prompter();
-
-function fizzy_prompter() {
-  var prompts  = {}
-  ,   prompter = {}
-  ;
-  
-  prompter.prompt = function(key, fun) {
-    if (fun !== undefined) {
-      prompts[key] = fun;
-    } else {
-      if (typeof prompts[key] === 'function') {
-        return prompts[key].call(null);
-      }
-    }
-  };
-  
-  return prompter;
 }
 
 fizzywig.sanitizer = function(html, policy) {

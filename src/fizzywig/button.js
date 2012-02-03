@@ -199,10 +199,10 @@ flb_proto.execute = function(e) {
   if (this.active) {
     document.execCommand('unlink', false, null);
   } else {
-    var url = fizzywig.prompter.prompt(this.prompt);
+    var return_vals = fizzywig.emitter.emit(this.prompt);
 
-    if (url) {
-      document.execCommand(this.command, false, url);
+    if (return_vals[this.prompt]) {
+      document.execCommand(this.command, false, return_vals[this.prompt][0]);
     }
   }
 
@@ -224,18 +224,10 @@ fvb_proto.check = function() {
 
 fvb_proto.execute = function(e) {
   e.preventDefault();
-  
-  var html;
-  
+    
   // restore our range since we've lost focus
-  fizzywig.range.restore();
-  
-  html = fizzywig.prompter.prompt(this.prompt);
-  
-  if (html) {
-    fizzywig.range.insertHTML(html);
-  }
-  
+  fizzywig.range.restore();  
+  fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
   fizzywig.emitter.emit('click change');
 };
 

@@ -38,13 +38,19 @@ function fizzy_emitter() {
     events = events.split(/\s+/);
     args   = args || [];
     
+    var return_vals = {};
+    
     events.forEach(function(evt) {
       if (listeners[evt]) {
+        return_vals[evt] = [];
+        
         listeners[evt].forEach(function(callback) {
-          callback.apply(this, args);
+          return_vals[evt].push(callback.apply(this, args));
         });
       }
     });
+    
+    return return_vals;
   };
   
   emitter.clear = function() {
