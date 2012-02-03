@@ -48,10 +48,16 @@ function fizzy_range() {
   };
   
   range.commonAncestor = function() {
-    var a = selection.commonAncestorContainer;
+    var a;
     
-    if (a && a.nodeType === 3) {
-      a = a.parentNode;
+    if (window.getSelection) {
+      a = selection.commonAncestorContainer;
+      
+      if (a && a.nodeType === 3) {
+        a = a.parentNode;
+      }
+    } else if (document.selection) {
+      a = selection.parentElement();
     }
     
     return a;
@@ -67,20 +73,41 @@ function fizzy_range() {
   };
   
   range.moveToEnd = function(node) {
-    var range, selection;
+    var range, sel;
     
     if (document.createRange) {
       range = document.createRange();
       range.selectNodeContents(node);
       range.collapse(false);
-      selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+      sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
     } else if (document.selection) {
       range = document.body.createTextRange();
       range.moveToElementText(node);
       range.collapse(false);
       range.select();
+    }
+  };
+  
+  range.insertHTML = function(str) {
+    if (selection && selection.pasteHTML) {
+      selection.pasteHTML(str);
+      
+    } else {
+      var el   = document.createElement("div")
+      ,   frag = document.createDocumentFragment()
+      ,   node
+      ,   lastNode
+      ;
+      
+      el.innerHTML = str;
+
+      while (node = el.firstChild) {
+        lastNode = frag.appendChild(node);
+      }
+      
+      selection.insertNode(frag);
     }
   };
   

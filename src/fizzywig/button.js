@@ -192,16 +192,20 @@ flb_proto.check = function() {
 
 flb_proto.execute = function(e) {
   e.preventDefault();
-  
-  // normalize the link button to toggle on/off like ul and ol
-  var toggled_command = this.active ? 'unlink' : this.command
-  ,   value           = fizzywig.prompter.prompt(this.prompt)
-  ;
 
   // restore our range since we've lost focus
   fizzywig.range.restore();
+  
+  if (this.active) {
+    document.execCommand('unlink', false, null);
+  } else {
+    var url = fizzywig.prompter.prompt(this.prompt);
 
-  document.execCommand(toggled_command, false, value);
+    if (url) {
+      document.execCommand(this.command, false, url);
+    }
+  }
+
   fizzywig.emitter.emit('click change');
 };
 
@@ -221,10 +225,17 @@ fvb_proto.check = function() {
 fvb_proto.execute = function(e) {
   e.preventDefault();
   
+  var html;
+  
   // restore our range since we've lost focus
   fizzywig.range.restore();
   
-  document.execCommand(this.command, false, fizzywig.prompter.prompt(this.prompt));
+  html = fizzywig.prompter.prompt(this.prompt);
+  
+  if (html) {
+    fizzywig.range.insertHTML(html);
+  }
+  
   fizzywig.emitter.emit('click change');
 };
 
