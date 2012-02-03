@@ -130,6 +130,10 @@ fizzywig.content = function(selector_or_list) {
     return content;
   };
   
+  content.moveToEnd = function() {
+    node_list[0].moveToEnd();
+  };
+  
   content.json = function() {
     var object_tree = {}
     ,   object_list = node_list.map(function(el) { return el.json() })
@@ -284,16 +288,17 @@ function fizzy_contentNode(node, content) {
   
   content_node.focus = function() {
     element_addClass(node, 'fizzy-active');
-    
-    fizzywig.range = fizzy_range();
-    fizzywig.range.moveToEnd(node);
-    
     return content_node;
   };
   
   content_node.blur = function() {
     element_removeClass(node, 'fizzy-active');
     return content_node;
+  };
+  
+  content_node.moveToEnd = function() {
+    fizzywig.range = fizzy_range();
+    fizzywig.range.moveToEnd(node);
   };
   
   content_node.json = function() {

@@ -55,6 +55,10 @@ fizzywig.content = function(selector_or_list) {
     return content;
   };
   
+  content.moveToEnd = function() {
+    node_list[0].moveToEnd();
+  };
+  
   content.json = function() {
     var object_tree = {}
     ,   object_list = node_list.map(function(el) { return el.json() })

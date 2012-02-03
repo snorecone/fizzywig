@@ -25,16 +25,17 @@ function fizzy_contentNode(node, content) {
   
   content_node.focus = function() {
     element_addClass(node, 'fizzy-active');
-    
-    fizzywig.range = fizzy_range();
-    fizzywig.range.moveToEnd(node);
-    
     return content_node;
   };
   
   content_node.blur = function() {
     element_removeClass(node, 'fizzy-active');
     return content_node;
+  };
+  
+  content_node.moveToEnd = function() {
+    fizzywig.range = fizzy_range();
+    fizzywig.range.moveToEnd(node);
   };
   
   content_node.json = function() {
