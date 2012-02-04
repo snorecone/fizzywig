@@ -51,7 +51,7 @@ function fizzy_contentNode(node, content) {
       textarea.style.display = 'none';
       node.style.display = 'block';
     } else {
-      textarea.innerHTML = node.innerHTML.trim();
+      textarea.value = node.innerHTML.trim();
       node.style.display = 'none';
       textarea.style.display = 'block';
     }
