@@ -278,14 +278,21 @@ fhtml_proto.check = function() {
 };
 
 fhtml_proto.activate = function() {
+  var me = this;
+  
+  fb_proto.activate.call(this);
+  
   if (this.active) {
     this.toolbar.disable();
-    this.enable();
+    
+    // hack :(
+    setTimeout(function() {
+      me.enable();
+    }, 5);
+
   } else {
     this.toolbar.enable();
   }
-  
-  fb_proto.activate.call(this);
 };
 
 
