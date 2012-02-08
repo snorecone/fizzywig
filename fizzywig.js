@@ -316,10 +316,14 @@ function fizzy_contentNode(node, content) {
       node.innerHTML = textarea.value.trim();
       textarea.style.display = 'none';
       node.style.display = 'block';
+      
+      fizzywig.emitter.emit('toggle:preview', [node]);
     } else {
       textarea.value = node.innerHTML.trim();
       node.style.display = 'none';
       textarea.style.display = 'block';
+      
+      fizzywig.emitter.emit('toggle:source', [textarea]);
     }
   };
   
