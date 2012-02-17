@@ -151,8 +151,12 @@ fizzywig.content = function(selector_or_list) {
     return object_tree;
   };
   
-  content.data = function() {
+  content.tidy = function(callback) {
+    if (content.isSourceMode()) {
+      content.toggleSourceMode();
+    }
     
+    node_list.forEach(function(el) { el.tidy(callback) });
   };
   
   content.toggleSourceMode = function() {
@@ -309,6 +313,10 @@ function fizzy_contentNode(node, content) {
     
     object_reach(object_tree, object_attr, (node.innerHTML || '').trim());
     return object_tree;
+  };
+  
+  content_node.tidy = function(callback) {
+    callback(node);
   };
   
   content_node.toggleSourceMode = function() {

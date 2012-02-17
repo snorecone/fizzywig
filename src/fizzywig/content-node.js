@@ -45,6 +45,10 @@ function fizzy_contentNode(node, content) {
     return object_tree;
   };
   
+  content_node.tidy = function(callback) {
+    callback(node);
+  };
+  
   content_node.toggleSourceMode = function() {
     if (content_node.isSourceMode()) {
       node.innerHTML = textarea.value.trim();
