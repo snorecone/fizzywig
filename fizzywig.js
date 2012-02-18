@@ -316,18 +316,19 @@ function fizzy_contentNode(node, content) {
   };
   
   content_node.tidy = function(callback) {
+    node.innerHTML = fizzywig.sanitizer(node.innerHTML, 'paste');
     callback(node);
   };
   
   content_node.toggleSourceMode = function() {
     if (content_node.isSourceMode()) {
-      node.innerHTML = textarea.value.trim();
+      node.innerHTML = fizzywig.sanitizer(textarea.value.trim(), 'paste');
       textarea.style.display = 'none';
       node.style.display = 'block';
       
       fizzywig.emitter.emit('toggle:preview', [node]);
     } else {
-      textarea.value = node.innerHTML.trim();
+      textarea.value = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
       node.style.display = 'none';
       textarea.style.display = 'block';
       
