@@ -116,7 +116,11 @@ function fizzy_contentNode(node, content) {
     
     // make sure the default format is a paragraph, and not text nodes or divs
     if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
-      document.execCommand('formatBlock', false, '<p>');
+      var n = fizzywig.range.commonAncestor();
+
+      if (!n || n.nodeName.toLowerCase() === 'div') {
+        document.execCommand('formatBlock', false, '<p>');
+      }
     }
   }
   

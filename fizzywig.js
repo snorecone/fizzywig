@@ -4,7 +4,7 @@ var fizzywig;
 
 fizzywig = {
   version: '0.0.1',
-  block_elements: ['p', 'pre', 'Normal'],
+  block_elements: ['p', 'pre', 'Normal', 'Preformatted'],
   inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
   void_elements: ['img', 'br', 'hr']
 };
@@ -390,7 +390,11 @@ function fizzy_contentNode(node, content) {
     
     // make sure the default format is a paragraph, and not text nodes or divs
     if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
-      document.execCommand('formatBlock', false, '<p>');
+      var n = fizzywig.range.commonAncestor();
+
+      if (!n || n.nodeName.toLowerCase() === 'div') {
+        document.execCommand('formatBlock', false, '<p>');
+      }
     }
   }
   
@@ -433,7 +437,7 @@ function FizzyButton(node, command, value, prompt, toolbar) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
-  '<pre>': FizzyCodeButton,
+  '<pre>': FizzyHeadingButton,
   '<p>': FizzyHeadingButton,
   'togglehtml': FizzyHTMLButton
 };

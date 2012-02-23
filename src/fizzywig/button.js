@@ -24,7 +24,7 @@ function FizzyButton(node, command, value, prompt, toolbar) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
-  '<pre>': FizzyCodeButton,
+  '<pre>': FizzyHeadingButton,
   '<p>': FizzyHeadingButton,
   'togglehtml': FizzyHTMLButton
 };
