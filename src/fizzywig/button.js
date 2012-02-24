@@ -24,6 +24,7 @@ function FizzyButton(node, command, value, prompt, toolbar) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
+  'code': FizzyInlineCustomButton,
   '<pre>': FizzyHeadingButton,
   '<p>': FizzyHeadingButton,
   'togglehtml': FizzyHTMLButton
@@ -175,6 +176,37 @@ fib_proto.execute = function(e) {
   document.execCommand(this.command, false, null);
   fizzywig.emitter.emit('click change');
 };
+
+
+
+function FizzyInlineCustomButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var ficb_proto = FizzyInlineCustomButton.prototype = new FizzyButton();
+ficb_proto.constructor = FizzyInlineCustomButton;
+
+ficb_proto.check = function() {
+  var active_command;
+
+  try {
+    active_command = fizzywig.range.is(this.command);
+  } catch (e) {}
+
+  this.active = active_command;
+  this.activate();
+};
+
+ficb_proto.execute = function(e) {
+  e.preventDefault();
+
+  // restore our range since we've lost focus
+  fizzywig.range.restore();
+
+  fizzywig.range.wrap(this.command);
+  fizzywig.emitter.emit('click change');
+};
+
 
 
 

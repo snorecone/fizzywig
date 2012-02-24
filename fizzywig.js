@@ -438,6 +438,7 @@ function FizzyButton(node, command, value, prompt, toolbar) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
+  'code': FizzyInlineCustomButton,
   '<pre>': FizzyHeadingButton,
   '<p>': FizzyHeadingButton,
   'togglehtml': FizzyHTMLButton
@@ -589,6 +590,37 @@ fib_proto.execute = function(e) {
   document.execCommand(this.command, false, null);
   fizzywig.emitter.emit('click change');
 };
+
+
+
+function FizzyInlineCustomButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var ficb_proto = FizzyInlineCustomButton.prototype = new FizzyButton();
+ficb_proto.constructor = FizzyInlineCustomButton;
+
+ficb_proto.check = function() {
+  var active_command;
+
+  try {
+    active_command = fizzywig.range.is(this.command);
+  } catch (e) {}
+
+  this.active = active_command;
+  this.activate();
+};
+
+ficb_proto.execute = function(e) {
+  e.preventDefault();
+
+  // restore our range since we've lost focus
+  fizzywig.range.restore();
+
+  fizzywig.range.wrap(this.command);
+  fizzywig.emitter.emit('click change');
+};
+
 
 
 
@@ -761,7 +793,7 @@ function fizzy_range(context) {
       sel.addRange(selection);
 
       if (with_parent) {
-        var r = context.createRange();
+        var r = document.createRange();
         var a = range.commonAncestor();
                 
         r.selectNode(a);
@@ -790,7 +822,7 @@ function fizzy_range(context) {
   }
   
   range.selectNode = function(node) {
-    var r = context.createRange();
+    var r = document.createRange();
     var sel = window.getSelection();
     
     sel.removeAllRanges();
@@ -801,19 +833,28 @@ function fizzy_range(context) {
   range.moveToEnd = function(node) {
     var range, sel;
     
-    if (context.createRange) {
-      range = context.createRange();
+    if (document.createRange) {
+      range = document.createRange();
       range.selectNodeContents(node);
       range.collapse(false);
       sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
     } else if (document.selection) {
-      range = context.createTextRange();
+      range = document.createTextRange();
       range.moveToElementText(node);
       range.collapse(false);
       range.select();
     }
+  };
+  
+  range.wrap = function(nodeName) {
+    var node;
+    
+    try {
+      node = document.createElement(nodeName);
+      selection.surroundContents(node);
+    } catch(e) {}
   };
   
   range.insertHTML = function(str) {
