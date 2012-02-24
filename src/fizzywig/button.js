@@ -202,11 +202,16 @@ ficb_proto.execute = function(e) {
 
   // restore our range since we've lost focus
   fizzywig.range.restore();
-
-  fizzywig.range.wrap(this.command);
+  this.check();
+  
+  if (this.active) {
+    document.execCommand('removeFormat', false, null);
+  } else {
+    fizzywig.range.wrap(this.command);
+  }
+  
   fizzywig.emitter.emit('click change');
 };
-
 
 
 

@@ -19,9 +19,18 @@ function fizzy_range(context) {
   };
   
   range.parentNode = function() {
+    var container;
+    
     if (selection) {
       if (window.getSelection) {
-        return selection.startContainer && selection.startContainer.parentNode.nodeName.toLowerCase();
+        container = selection.startContainer;
+        
+        if (container && container.nodeType === 3) {
+          container = container.parentNode;
+        }
+
+        return container && container.nodeName.toLowerCase();
+        
       } else {
         return selection.parentElement().nodeName.toLowerCase();
       }
@@ -103,6 +112,7 @@ function fizzy_range(context) {
     try {
       node = document.createElement(nodeName);
       selection.surroundContents(node);
+      range.selectNode(node);
     } catch(e) {}
   };
   
