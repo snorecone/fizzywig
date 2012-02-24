@@ -34,7 +34,7 @@ function fizzy_contentNode(node, content) {
   };
   
   content_node.moveToEnd = function() {
-    fizzywig.range = fizzy_range();
+    fizzywig.range = fizzy_range(node);
     fizzywig.range.moveToEnd(node);
   };
   
@@ -78,11 +78,16 @@ function fizzy_contentNode(node, content) {
     }
   };
     
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);  
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', makeRange);
   element_addEventListener(node, 'keydown', keydown);
   element_addEventListener(node, 'paste', paste);
   element_addEventListener(node, 'mouseover', mouseover);
   element_addEventListener(node, 'mouseout', mouseout);
+  
+  function makeRange(e) {
+    fizzywig.range = fizzy_range(node);
+  }
   
   function mouseover(e) {
     element_addClass(node, 'fizzy-hover');
@@ -94,30 +99,30 @@ function fizzy_contentNode(node, content) {
   
   function keydown(e) {
     // if we're backspacing and there's no text left, don't delete the block element
-    if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
-      e.preventDefault();
-      return;
-    }
+    // if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
+    //   e.preventDefault();
+    //   return;
+    // }
     
     // normalize this bullshit in pre elements. when you hit the enter key,
     // you should create a new paragraph below the pre that you are in.
-    if (e.which === 13 && !e.shiftKey) {
-      var n = fizzywig.range.commonAncestor();
-
-      if (n.nodeName.toLowerCase() === 'pre') {
-        var end = document.createTextNode('\00');
-
-        n.parentNode.insertBefore(end, n.nextSibling);
-        fizzywig.range.selectNode(end);
-        
-        document.execCommand('formatBlock', false, '<p>');
-      }
-    }
-    
+    // if (e.which === 13 && !e.shiftKey) {
+    //   var n = fizzywig.range.commonAncestor();
+    // 
+    //   if (n.nodeName.toLowerCase() === 'pre') {
+    //     var end = document.createTextNode('\00');
+    // 
+    //     n.parentNode.insertBefore(end, n.nextSibling);
+    //     fizzywig.range.selectNode(end);
+    //     
+    //     document.execCommand('formatBlock', false, '<p>');
+    //   }
+    // }
+    // 
     // make sure the default format is a paragraph, and not text nodes or divs
     if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
       var n = fizzywig.range.commonAncestor();
-
+    
       if (!n || n.nodeName.toLowerCase() === 'div') {
         document.execCommand('formatBlock', false, '<p>');
       }

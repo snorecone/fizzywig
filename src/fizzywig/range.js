@@ -1,4 +1,4 @@
-function fizzy_range() {
+function fizzy_range(context) {
   var selection
   ,   range = {}
   ;
@@ -31,11 +31,18 @@ function fizzy_range() {
   range.restore = function(with_parent) {
     if (window.getSelection) {
       var sel = window.getSelection();
+      
+      if (selection.collapsed) {
+        var shim = document.createTextNode('\00');
+        selection.insertNode(shim);
+        selection.selectNode(shim);
+      }
+      
       sel.removeAllRanges();
       sel.addRange(selection);
-      
+
       if (with_parent) {
-        var r = document.createRange();
+        var r = context.createRange();
         var a = range.commonAncestor();
                 
         r.selectNode(a);
@@ -49,7 +56,7 @@ function fizzy_range() {
   
   range.commonAncestor = function() {
     var a;
-    
+
     if (window.getSelection) {
       a = selection.commonAncestorContainer;
       
@@ -64,7 +71,7 @@ function fizzy_range() {
   }
   
   range.selectNode = function(node) {
-    var r = document.createRange();
+    var r = context.createRange();
     var sel = window.getSelection();
     
     sel.removeAllRanges();
@@ -75,15 +82,15 @@ function fizzy_range() {
   range.moveToEnd = function(node) {
     var range, sel;
     
-    if (document.createRange) {
-      range = document.createRange();
+    if (context.createRange) {
+      range = context.createRange();
       range.selectNodeContents(node);
       range.collapse(false);
       sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
     } else if (document.selection) {
-      range = document.body.createTextRange();
+      range = context.createTextRange();
       range.moveToElementText(node);
       range.collapse(false);
       range.select();

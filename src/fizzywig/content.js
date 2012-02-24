@@ -91,11 +91,7 @@ fizzywig.content = function(selector_or_list) {
   content.sanitize = function() {
     node_list.forEach(function(el) { el.sanitize() });
   };
-  
-  fizzywig.emitter.on('keyup mouseup paste change blur', function() {
-    fizzywig.range = fizzy_range();
-  });
-  
+    
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
   
   fizzywig.emitter.on('focus', function() {
