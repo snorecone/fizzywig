@@ -41,6 +41,8 @@ function fizzy_range(context) {
     if (window.getSelection) {
       var sel = window.getSelection();
       
+      context.focus();
+      
       if (selection.collapsed) {
         var shim = document.createTextNode('\00');
         selection.insertNode(shim);
@@ -53,9 +55,13 @@ function fizzy_range(context) {
       if (with_parent) {
         var r = document.createRange();
         var a = range.commonAncestor();
-                
-        r.selectNode(a);
-        sel.addRange(r);
+        
+        if (a !== context) {
+          r.selectNode(a);
+          
+          sel.removeAllRanges();
+          sel.addRange(r);
+        }
       }
       
     } else if (document.selection && selection.select) {

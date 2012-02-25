@@ -24,12 +24,10 @@ function fizzy_contentNode(node, content) {
   };
   
   content_node.focus = function() {
-    element_addClass(node, 'fizzy-active');
     return content_node;
   };
   
   content_node.blur = function() {
-    element_removeClass(node, 'fizzy-active');
     return content_node;
   };
   
@@ -82,27 +80,18 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'focus blur keyup mouseup paste change', makeRange);
   element_addEventListener(node, 'keydown', keydown);
   element_addEventListener(node, 'paste', paste);
-  element_addEventListener(node, 'mouseover', mouseover);
-  element_addEventListener(node, 'mouseout', mouseout);
   
   function makeRange(e) {
     fizzywig.range = fizzy_range(node);
   }
   
-  function mouseover(e) {
-    element_addClass(node, 'fizzy-hover');
-  }
-  
-  function mouseout(e) {
-    element_removeClass(node, 'fizzy-hover');
-  }
-  
   function keydown(e) {
     // if we're backspacing and there's no text left, don't delete the block element
-    // if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
-    //   e.preventDefault();
-    //   return;
-    // }
+    if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
+      e.preventDefault();
+      node.innerHTML = '';
+      return;
+    }
     
     // normalize this bullshit in pre elements. when you hit the enter key,
     // you should create a new paragraph below the pre that you are in.
