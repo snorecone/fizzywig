@@ -22,5 +22,4 @@ fizzywig.sanitizer.policies = {
 
 // object for building our paste policy
 // add block, inline and void elements
-fizzywig.sanitizer.paste_elements = 
-  fizzywig.block_elements.concat(fizzywig.inline_elements, fizzywig.void_elements);
+fizzywig.sanitizer.paste_elements = fizzywig.whitelist;

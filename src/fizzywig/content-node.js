@@ -75,7 +75,7 @@ function fizzy_contentNode(node, content) {
       textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');
     }
   };
-    
+      
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
   element_addEventListener(node, 'focus blur keyup mouseup paste change', makeRange);
   element_addEventListener(node, 'keydown', keydown);

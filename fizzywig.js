@@ -6,7 +6,72 @@ fizzywig = {
   version: '0.0.1',
   block_elements: ['p', 'pre', 'Normal', 'Preformatted'],
   inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
-  void_elements: ['img', 'br', 'hr']
+  void_elements: ['img', 'br', 'hr'],
+  whitelist: [
+    'a',
+    'abbr',
+    'acronym',
+    'address',
+    'area',
+    'b',
+    'bdo',
+    'big',
+    'blockquote',
+    'br',
+    'caption',
+    'center',
+    'cite',
+    'code',
+    'colgroup',
+    'dd',
+    'del',
+    'dfn',
+    'dir',
+    'div',
+    'dl',
+    'dt',
+    'em',
+    'font',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hr',
+    'i',
+    'img',
+    'ins',
+    'kbd',
+    'li',
+    'map',
+    'menu',
+    'object',
+    'ol',
+    'p',
+    'param',
+    'pre',
+    'q',
+    's',
+    'samp',
+    'small',
+    'span',
+    'strike',
+    'strong',
+    'sub',
+    'sup',
+    'table',
+    'tbody',
+    'td',
+    'tfoot',
+    'th',
+    'thead',
+    'tr',
+    'tt',
+    'u',
+    'ul',
+    'var'
+  ]
 };
 
 // heading levels
@@ -345,7 +410,7 @@ function fizzy_contentNode(node, content) {
       textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');
     }
   };
-    
+      
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
   element_addEventListener(node, 'focus blur keyup mouseup paste change', makeRange);
   element_addEventListener(node, 'keydown', keydown);
@@ -915,8 +980,7 @@ fizzywig.sanitizer.policies = {
 
 // object for building our paste policy
 // add block, inline and void elements
-fizzywig.sanitizer.paste_elements = 
-  fizzywig.block_elements.concat(fizzywig.inline_elements, fizzywig.void_elements);
+fizzywig.sanitizer.paste_elements = fizzywig.whitelist;
 function object_deepMerge() {
   var args = Array.prototype.slice.apply(arguments);
   
