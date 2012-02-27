@@ -174,6 +174,7 @@ fib_proto.execute = function(e) {
   fizzywig.range.restore();
 
   document.execCommand(this.command, false, null);
+
   fizzywig.emitter.emit('click change');
 };
 
@@ -265,38 +266,6 @@ fvb_proto.execute = function(e) {
   // restore our range since we've lost focus
   fizzywig.range.restore();  
   fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
-  fizzywig.emitter.emit('click change');
-};
-
-function FizzyCodeButton() {
-  FizzyButton.apply(this, arguments);
-}
-
-var fcb_proto = FizzyCodeButton.prototype = new FizzyButton();
-fvb_proto.constructor = FizzyCodeButton;
-
-fcb_proto.check = function() {
-  var active_value;
-
-  try {
-    active_value = document.queryCommandValue(this.command);
-  } catch (e) {}
-
-  active_value = FizzyButton.normalizeCommandValue(active_value);
-  this.active = this.value === active_value;
-  this.activate();
-};
-
-fcb_proto.execute = function(e) {
-  e.preventDefault();
-
-  // normalize the heading buttons to toggle on/off like ul and ol
-  var toggled_value = this.active ? '<p>' : this.value;
-
-  // restore our range since we've lost focus
-  fizzywig.range.restore(true);
-
-  document.execCommand(this.command, false, toggled_value);
   fizzywig.emitter.emit('click change');
 };
 

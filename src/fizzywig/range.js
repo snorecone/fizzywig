@@ -47,6 +47,7 @@ function fizzy_range(context) {
         var shim = document.createTextNode('\00');
         selection.insertNode(shim);
         selection.selectNode(shim);
+        selection.collapse(false);
       }
       
       sel.removeAllRanges();

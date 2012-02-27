@@ -88,6 +88,8 @@ function fizzy_contentNode(node, content) {
   }
   
   function keydown(e) {
+    fizzywig.range = fizzy_range(node);
+    
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
