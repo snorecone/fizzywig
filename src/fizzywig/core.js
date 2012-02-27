@@ -27,6 +27,7 @@ fizzywig = {
     'dl',
     'dt',
     'em',
+    'embed',
     'font',
     'h1',
     'h2',

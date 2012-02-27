@@ -31,6 +31,7 @@ fizzywig = {
     'dl',
     'dt',
     'em',
+    'embed',
     'font',
     'h1',
     'h2',
@@ -385,17 +386,19 @@ function fizzy_contentNode(node, content) {
   
   content_node.toggleSourceMode = function() {
     if (content_node.isSourceMode()) {
-      node.innerHTML = textarea.value.trim();
+      node.innerHTML = fizzywig.sanitizer(textarea.value.trim(), 'paste');
       textarea.style.display = 'none';
       node.style.display = 'block';
       
-      fizzywig.emitter.emit('toggle:preview', [node]);
+      fizzywig.emitter.emit('sanitize:preview', [node]);
     } else {
-      textarea.value = node.innerHTML.trim();
+      var val      = node.innerHTML.trim()
+      ,   user_val = fizzywig.emitter.emit('sanitize:source', [val])
+      ;
+            
+      textarea.value = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
       node.style.display = 'none';
       textarea.style.display = 'block';
-      
-      fizzywig.emitter.emit('toggle:source', [textarea]);
     }
   };
   
