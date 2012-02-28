@@ -483,7 +483,7 @@ FizzyButton.types = {
   'createlink': FizzyLinkButton,
   'code': FizzyInlineCustomButton,
   '<pre>': FizzyHeadingButton,
-  '<p>': FizzyHeadingButton,
+  '<p>': FizzyNormalButton,
   'togglehtml': FizzyHTMLButton
 };
 
@@ -602,6 +602,29 @@ fhb_proto.execute = function(e) {
     document.execCommand(this.command, false, this.value);
     fizzywig.emitter.emit('click change');
   }
+};
+
+
+
+// Headings can be options or buttons
+function FizzyNormalButton() {
+  FizzyHeadingButton.apply(this, arguments);
+}
+
+var fnb_proto = FizzyNormalButton.prototype = new FizzyHeadingButton();
+fnb_proto.constructor = FizzyNormalButton;
+
+fnb_proto.check = function() {
+  var active_value, active_list;
+
+  try {
+    active_value = document.queryCommandValue(this.command);
+    active_list = document.queryCommandState('insertunorderedlist') || document.queryCommandState('insertorderedlist');
+  } catch (e) {}
+
+  active_value = FizzyButton.normalizeCommandValue(active_value);
+  this.active = this.value === active_value || active_list;
+  this.activate();
 };
 
 
