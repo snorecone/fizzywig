@@ -52,7 +52,7 @@ fb_proto.init = function() {
   element_addEventListener(this.nodeTarget, 'focus', FizzyButton.emit('focus'));
   
   if (this.isChild()) {
-    element_addEventListener(this.nodeTarget, 'change', function(e) { button.execute(e) });
+    element_addEventListener(this.nodeTarget, 'change click', function(e) { button.execute(e) });
   } else {
     element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
   }
