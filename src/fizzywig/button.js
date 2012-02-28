@@ -1,3 +1,7 @@
+function restoreSelection() {
+  // fizzywig.selection.setSingleRange(fizzywig.range);
+}
+
 function fizzy_button(node, toolbar) {
   var key, command, value, prompt, button;
   
@@ -140,7 +144,7 @@ fhb_proto.execute = function(e) {
 
   if (this.isChild() && this.nodeTarget.value === this.node.value) {
     // restore our range since we've lost focus
-    fizzywig.range.restore(true);
+    restoreSelection(true);
 
     document.execCommand(this.command, false, this.value);
     fizzywig.emitter.emit('click change');
@@ -194,7 +198,7 @@ fib_proto.execute = function(e) {
   e.preventDefault();
 
   // restore our range since we've lost focus
-  fizzywig.range.restore();
+  restoreSelection();
   
   if (['insertunorderedlist', 'insertorderedlist'].indexOf(this.command) !== -1) {
     document.execCommand('formatBlock', false, '<p>');
@@ -215,10 +219,11 @@ var ficb_proto = FizzyInlineCustomButton.prototype = new FizzyButton();
 ficb_proto.constructor = FizzyInlineCustomButton;
 
 ficb_proto.check = function() {
-  var active_command;
+  var active_command, ac;
 
   try {
-    active_command = fizzywig.range.is(this.command);
+    ac = fizzywig.range.commonAncestorContainer;
+    active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === this.command.toUpperCase()) || (ac.nodeType === 1 && ac.nodeName === this.command.toUpperCase()));
   } catch (e) {}
 
   this.active = active_command;
@@ -227,15 +232,27 @@ ficb_proto.check = function() {
 
 ficb_proto.execute = function(e) {
   e.preventDefault();
+  var ac, n;
 
   // restore our range since we've lost focus
-  fizzywig.range.restore();
+  restoreSelection();
   this.check();
   
   if (this.active) {
+    ac = fizzywig.range.commonAncestorContainer;
+    
+    if (ac.nodeType === 3 && ac.parentNode.nodeName === 'CODE') {
+      n = ac.parentNode;
+    } else if (ac.nodeType === 1 && ac.nodeName === 'CODE') {
+      n = ac;
+    }
+    
+    fizzywig.range.selectNode(n);
     document.execCommand('removeFormat', false, null);
-  } else {
-    fizzywig.range.wrap(this.command);
+    
+  } else if (fizzywig.range.canSurroundContents()) {
+    n = document.createElement(this.command);
+    fizzywig.range.surroundContents(n);
   }
   
   fizzywig.emitter.emit('click change');
@@ -251,7 +268,13 @@ var flb_proto = FizzyLinkButton.prototype = new FizzyButton();
 flb_proto.constructor = FizzyLinkButton;
 
 flb_proto.check = function() {
-  this.active = fizzywig.range.is('a');
+  var ac, active_command;
+  
+  ac = fizzywig.range.commonAncestorContainer;
+  active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
+  
+  // was fizzywig.range.is('a')
+  this.active = active_command;
   this.activate();
 };
 
@@ -259,7 +282,7 @@ flb_proto.execute = function(e) {
   e.preventDefault();
 
   // restore our range since we've lost focus
-  fizzywig.range.restore();
+  restoreSelection();
   
   if (this.active) {
     document.execCommand('unlink', false, null);
@@ -291,7 +314,7 @@ fvb_proto.execute = function(e) {
   e.preventDefault();
     
   // restore our range since we've lost focus
-  fizzywig.range.restore();  
+  restoreSelection();  
   fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
   fizzywig.emitter.emit('click change');
 };

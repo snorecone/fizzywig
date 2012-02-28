@@ -32,8 +32,11 @@ function fizzy_contentNode(node, content) {
   };
   
   content_node.moveToEnd = function() {
-    fizzywig.range = fizzy_range(node);
-    fizzywig.range.moveToEnd(node);
+    fizzywig.selection = rangy.getSelection();
+    fizzywig.range = rangy.createRange();
+    fizzywig.range.selectNodeContents(node);
+    fizzywig.range.collapse(false);
+    fizzywig.selection.setSingleRange(fizzywig.range);
   };
   
   content_node.json = function() {
@@ -84,11 +87,18 @@ function fizzy_contentNode(node, content) {
   element_addEventListener(node, 'paste', paste);
   
   function makeRange(e) {
-    fizzywig.range = fizzy_range(node);
+    fizzywig.selection = rangy.getSelection();
+    console.log('orig selection: ')
+    console.dir(fizzywig.selection)
+    fizzywig.range = fizzywig.selection.rangeCount ? fizzywig.selection.getRangeAt(0) : rangy.createRange();
+    console.log('new selection: ')
+    console.dir(fizzywig.selection)
+    console.log('range: ')
+    console.dir(fizzywig.range)
   }
   
   function normalizeBlockFormat(e) {
-    fizzywig.range = fizzy_range(node);
+    makeRange(e);
     
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
@@ -96,13 +106,14 @@ function fizzy_contentNode(node, content) {
       node.innerHTML = '';
     }
     
-    // make sure the default format is a paragraph, and not text nodes or divs
-    if (fizzywig.block_elements.indexOf(document.queryCommandValue('formatBlock')) === -1) {
-      var n = fizzywig.range.commonAncestor();
-
-      if (!n || n.nodeName.toLowerCase() === 'div') {
-        document.execCommand('formatBlock', false, '<p>');
-      }
+    // cases where we want to format block
+    // - no ancestor
+    // - text ancestor with parent == node
+    // - ancestor == div && ancestor parent == node
+    var ca = fizzywig.range.commonAncestorContainer;
+    
+    if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
+      document.execCommand('formatBlock', false, '<p>');
     }
   }
   
