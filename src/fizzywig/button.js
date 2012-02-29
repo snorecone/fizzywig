@@ -50,7 +50,7 @@ fb_proto.init = function() {
   fizzywig.emitter.on('keyup mouseup paste change', function() { button.check() });
   element_addEventListener(this.nodeTarget, 'blur', FizzyButton.emit('blur'));
   element_addEventListener(this.nodeTarget, 'focus', FizzyButton.emit('focus'));
-  
+
   if (this.isChild()) {
     element_addEventListener(this.nodeTarget, 'change', function(e) { button.execute(e) });
   } else {
@@ -142,7 +142,7 @@ fhb_proto.check = function() {
 fhb_proto.execute = function(e) {
   e.preventDefault();
 
-  if (this.isChild() && this.nodeTarget.value === this.node.value) {
+  if (this.isChild() && this.nodeTarget.options[this.nodeTarget.selectedIndex].value === this.node.value) {
     // restore our range since we've lost focus
     this.restoreSelection(true);
 
