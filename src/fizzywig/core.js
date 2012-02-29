@@ -3,6 +3,7 @@ fizzywig = {
   block_elements: ['p', 'pre', 'Normal', 'Preformatted'],
   inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
   void_elements: ['img', 'br', 'hr'],
+  first_children: ['p', 'ul', 'ol', 'pre'],
   whitelist: [
     'a',
     'abbr',
@@ -75,5 +76,6 @@ fizzywig = {
 [1, 2, 3, 4, 5, 6].forEach(function(i) {
   fizzywig.block_elements.push('Heading ' + i);
   fizzywig.block_elements.push('h' + i);
+  fizzywig.first_children.push('h' + i);
 });
 

@@ -53,7 +53,11 @@ function fizzy_range() {
     try {
       _range.insertNode(node);
     } catch(e) {}
-  }
+  };
+  
+  range.startContainer = function() {
+    return _range && _range.startContainer;
+  };
   
   return range;
 }

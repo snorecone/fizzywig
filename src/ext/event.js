@@ -16,7 +16,7 @@ function event_normalize(callback) {
     
     evt.target = evt.target || evt.srcElement;
     evt.which  = evt.keyCode || evt.charCode;
-    
+
     callback.apply(this, [evt]);
   }
 }

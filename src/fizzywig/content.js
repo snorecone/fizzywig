@@ -109,7 +109,7 @@ fizzywig.content = function(selector_or_node) {
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
   
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(emit, 50));
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
   element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
@@ -128,11 +128,23 @@ fizzywig.content = function(selector_or_node) {
     // - ancestor == div && ancestor parent == node
     
     try {
-      var ca = fizzywig.range.commonAncestor();
+      var ca = fizzywig.range.commonAncestor()
+      ,   sc = fizzywig.range.startContainer()
+      ;
 
-      if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
+      if (!ca || (ca === node && sc && sc.nodeType === 3)) {
         document.execCommand('formatBlock', false, '<p>');
+        
+      } else {
+        while (ca !== node) {
+          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.first_children.indexOf(ca.nodeName.toLowerCase()) === -1)) {
+            document.execCommand('formatBlock', false, '<p>');
+          }
+          
+          ca = ca.parentNode;
+        } 
       }
+      
     } catch(e) {}
   }
   

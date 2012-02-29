@@ -7,6 +7,7 @@ fizzywig = {
   block_elements: ['p', 'pre', 'Normal', 'Preformatted'],
   inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
   void_elements: ['img', 'br', 'hr'],
+  first_children: ['p', 'ul', 'ol', 'pre'],
   whitelist: [
     'a',
     'abbr',
@@ -79,6 +80,7 @@ fizzywig = {
 [1, 2, 3, 4, 5, 6].forEach(function(i) {
   fizzywig.block_elements.push('Heading ' + i);
   fizzywig.block_elements.push('h' + i);
+  fizzywig.first_children.push('h' + i);
 });
 
 fizzywig.emitter = fizzy_emitter();
@@ -256,7 +258,7 @@ fizzywig.content = function(selector_or_node) {
   // a proxy for our emitter
   content.on = fizzywig.emitter.on;
   
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(emit, 50));
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
   element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
@@ -275,11 +277,23 @@ fizzywig.content = function(selector_or_node) {
     // - ancestor == div && ancestor parent == node
     
     try {
-      var ca = fizzywig.range.commonAncestor();
+      var ca = fizzywig.range.commonAncestor()
+      ,   sc = fizzywig.range.startContainer()
+      ;
 
-      if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
+      if (!ca || (ca === node && sc && sc.nodeType === 3)) {
         document.execCommand('formatBlock', false, '<p>');
+        
+      } else {
+        while (ca !== node) {
+          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.first_children.indexOf(ca.nodeName.toLowerCase()) === -1)) {
+            document.execCommand('formatBlock', false, '<p>');
+          }
+          
+          ca = ca.parentNode;
+        } 
       }
+      
     } catch(e) {}
   }
   
@@ -374,26 +388,26 @@ function fizzy_toolbar(selector_or_node, content) {
     return content;
   };
   
-  fizzywig.emitter.on('focus', function() {
-    keepalive = true;
-    toolbar.enable();
-  });
-  
-  fizzywig.emitter.on('blur', function(e) {
-    keepalive = false;
-    
-    setTimeout(function() {
-      if (!keepalive) {
-        toolbar.disable();
-      }
-    }, 150);
-  });
+  // fizzywig.emitter.on('focus', function() {
+  //   keepalive = true;
+  //   toolbar.enable();
+  // });
+  // 
+  // fizzywig.emitter.on('blur', function(e) {
+  //   keepalive = false;
+  //   
+  //   setTimeout(function() {
+  //     if (!keepalive) {
+  //       toolbar.disable();
+  //     }
+  //   }, 150);
+  // });
   
   fizzywig.emitter.on('click', function() {
     keepalive = true;
   });
   
-  return toolbar.disable();
+  return toolbar.enable();
 }
 
 function fizzy_button(node, toolbar) {
@@ -813,7 +827,11 @@ function fizzy_range() {
     try {
       _range.insertNode(node);
     } catch(e) {}
-  }
+  };
+  
+  range.startContainer = function() {
+    return _range && _range.startContainer;
+  };
   
   return range;
 }
@@ -907,7 +925,7 @@ function event_normalize(callback) {
     
     evt.target = evt.target || evt.srcElement;
     evt.which  = evt.keyCode || evt.charCode;
-    
+
     callback.apply(this, [evt]);
   }
 }
