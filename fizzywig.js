@@ -300,7 +300,7 @@ function fizzy_toolbar(selector_or_node, content) {
   };
   
   toolbar.disable = function() {
-    button_list.forEach(function(button) { button.disable() });
+    // button_list.forEach(function(button) { button.disable() });
     return toolbar;
   };
   
@@ -480,7 +480,7 @@ function fizzy_contentNode(node, content) {
 }
 
 function restoreSelection() {
-  // fizzywig.selection.setSingleRange(fizzywig.range);
+  document.querySelector('[contenteditable]').focus();
 }
 
 function fizzy_button(node, toolbar) {
@@ -537,7 +537,7 @@ fb_proto.init = function() {
   element_addEventListener(this.nodeTarget, 'focus', FizzyButton.emit('focus'));
   
   if (this.isChild()) {
-    element_addEventListener(this.nodeTarget, 'change click', function(e) { button.execute(e) });
+    element_addEventListener(this.nodeTarget, 'change', function(e) { button.execute(e) });
   } else {
     element_addEventListener(this.node, 'click', function(e) { button.execute(e) });
   }
