@@ -7,7 +7,7 @@ fizzywig.sanitizer.policies = {
   paste: function(tag_name, attributes) {
     if (fizzywig.sanitizer.paste_elements.indexOf(tag_name) !== -1) {
       return html_sanitizer.sanitizeAttribs(
-        tag_name, attributes, fizzywig.sanitizer.policies.uri, fizzywig.sanitizer.policies.tokens);
+        tag_name, attributes, fizzywig.sanitizer.policies.uri);
     }
   },
   

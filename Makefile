@@ -15,11 +15,9 @@ fizzywig.js: \
 	src/fizzywig/emitter.js \
 	src/fizzywig/content.js \
 	src/fizzywig/toolbar.js \
-	src/fizzywig/content-node.js \
 	src/fizzywig/button.js \
 	src/fizzywig/range.js \
 	src/fizzywig/sanitizer.js \
-	src/ext/object.js \
 	src/ext/element.js \
 	src/ext/event.js \
 	src/postamble.js
