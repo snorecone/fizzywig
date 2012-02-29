@@ -50,13 +50,13 @@ fizzywig.content = function(selector_or_node) {
     node.removeAttribute('contentEditable');
     return content;
   };
+  
+  content.focus = function() {
+    node.focus();
+  };
     
   content.moveToEnd = function() {
-    fizzywig.selection = rangy.getSelection();
-    fizzywig.range = rangy.createRange();
-    fizzywig.range.selectNodeContents(node);
-    fizzywig.range.collapse(false);
-    fizzywig.selection.setSingleRange(fizzywig.range);
+    fizzywig.range.moveToEnd(node);
   };
   
   content.json = function() {
@@ -110,17 +110,12 @@ fizzywig.content = function(selector_or_node) {
   content.on = fizzywig.emitter.on;
   
   element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(emit, 50));
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(makeRange, 50));
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
-  function makeRange(e) {
-    fizzywig.selection = rangy.getSelection();
-    fizzywig.range = fizzywig.selection.rangeCount && fizzywig.selection.getRangeAt(0);
-
-    normalizeBlockFormat(e);
-  }
-  
   function normalizeBlockFormat(e) {    
+    fizzywig.range.get();
+    
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
@@ -133,7 +128,7 @@ fizzywig.content = function(selector_or_node) {
     // - ancestor == div && ancestor parent == node
     
     try {
-      var ca = fizzywig.range.commonAncestorContainer;
+      var ca = fizzywig.range.commonAncestor();
 
       if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
         document.execCommand('formatBlock', false, '<p>');

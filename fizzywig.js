@@ -197,13 +197,13 @@ fizzywig.content = function(selector_or_node) {
     node.removeAttribute('contentEditable');
     return content;
   };
+  
+  content.focus = function() {
+    node.focus();
+  };
     
   content.moveToEnd = function() {
-    fizzywig.selection = rangy.getSelection();
-    fizzywig.range = rangy.createRange();
-    fizzywig.range.selectNodeContents(node);
-    fizzywig.range.collapse(false);
-    fizzywig.selection.setSingleRange(fizzywig.range);
+    fizzywig.range.moveToEnd(node);
   };
   
   content.json = function() {
@@ -257,17 +257,12 @@ fizzywig.content = function(selector_or_node) {
   content.on = fizzywig.emitter.on;
   
   element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(emit, 50));
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(makeRange, 50));
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
-  function makeRange(e) {
-    fizzywig.selection = rangy.getSelection();
-    fizzywig.range = fizzywig.selection.rangeCount && fizzywig.selection.getRangeAt(0);
-
-    normalizeBlockFormat(e);
-  }
-  
   function normalizeBlockFormat(e) {    
+    fizzywig.range.get();
+    
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
@@ -280,7 +275,7 @@ fizzywig.content = function(selector_or_node) {
     // - ancestor == div && ancestor parent == node
     
     try {
-      var ca = fizzywig.range.commonAncestorContainer;
+      var ca = fizzywig.range.commonAncestor();
 
       if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
         document.execCommand('formatBlock', false, '<p>');
@@ -363,7 +358,7 @@ function fizzy_toolbar(selector_or_node, content) {
   };
   
   toolbar.disable = function() {
-    // button_list.forEach(function(button) { button.disable() });
+    button_list.forEach(function(button) { button.disable() });
     return toolbar;
   };
   
@@ -373,6 +368,10 @@ function fizzy_toolbar(selector_or_node, content) {
   
   toolbar.isSourceMode = function() {
     return content.isSourceMode();
+  };
+  
+  toolbar.content = function() {
+    return content;
   };
   
   fizzywig.emitter.on('focus', function() {
@@ -395,10 +394,6 @@ function fizzy_toolbar(selector_or_node, content) {
   });
   
   return toolbar.disable();
-}
-
-function restoreSelection() {
-  document.querySelector('[contenteditable]').focus();
 }
 
 function fizzy_button(node, toolbar) {
@@ -475,6 +470,10 @@ fb_proto.disable = function() {
   this.nodeTarget.setAttribute('disabled', 'disabled');
 };
 
+fb_proto.restoreSelection = function() {
+  this.toolbar.content().focus();
+};
+
 fb_proto.activate = function() {
   if (this.active) {
     element_addClass(this.nodeTarget, 'active');
@@ -543,7 +542,7 @@ fhb_proto.execute = function(e) {
 
   if (this.isChild() && this.nodeTarget.value === this.node.value) {
     // restore our range since we've lost focus
-    restoreSelection(true);
+    this.restoreSelection(true);
 
     document.execCommand(this.command, false, this.value);
     fizzywig.emitter.emit('click change');
@@ -597,7 +596,7 @@ fib_proto.execute = function(e) {
   e.preventDefault();
 
   // restore our range since we've lost focus
-  restoreSelection();
+  this.restoreSelection();
   
   if (['insertunorderedlist', 'insertorderedlist'].indexOf(this.command) !== -1) {
     document.execCommand('formatBlock', false, '<p>');
@@ -621,7 +620,7 @@ ficb_proto.check = function() {
   var active_command, ac;
 
   try {
-    ac = fizzywig.range.commonAncestorContainer;
+    ac = fizzywig.range.commonAncestor();
     active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === this.command.toUpperCase()) || (ac.nodeType === 1 && ac.nodeName === this.command.toUpperCase()));
   } catch (e) {}
 
@@ -634,11 +633,11 @@ ficb_proto.execute = function(e) {
   var ac, n;
 
   // restore our range since we've lost focus
-  restoreSelection();
+  this.restoreSelection();
   this.check();
   
   if (this.active) {
-    ac = fizzywig.range.commonAncestorContainer;
+    ac = fizzywig.range.commonAncestor();
     
     if (ac.nodeType === 3 && ac.parentNode.nodeName === 'CODE') {
       n = ac.parentNode;
@@ -649,7 +648,7 @@ ficb_proto.execute = function(e) {
     fizzywig.range.selectNode(n);
     document.execCommand('removeFormat', false, null);
     
-  } else if (fizzywig.range && fizzywig.range.canSurroundContents()) {
+  } else {
     n = document.createElement(this.command);
     fizzywig.range.surroundContents(n);
   }
@@ -670,7 +669,7 @@ flb_proto.check = function() {
   var ac, active_command;
   
   try {
-    ac = fizzywig.range.commonAncestorContainer;
+    ac = fizzywig.range.commonAncestor();
     active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
   } catch(e) {}
     
@@ -682,7 +681,7 @@ flb_proto.execute = function(e) {
   e.preventDefault();
 
   // restore our range since we've lost focus
-  restoreSelection();
+  this.restoreSelection();
   
   if (this.active) {
     document.execCommand('unlink', false, null);
@@ -714,7 +713,7 @@ fvb_proto.execute = function(e) {
   e.preventDefault();
     
   // restore our range since we've lost focus
-  restoreSelection();  
+  this.restoreSelection();  
   fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
   fizzywig.emitter.emit('click change');
 };
@@ -759,151 +758,62 @@ fhtml_proto.execute = function(e) {
   fizzywig.emitter.emit('click change toggle');
 };
 
-function fizzy_range(context) {
-  var selection
-  ,   range = {}
+fizzywig.range = fizzy_range();
+
+function fizzy_range() {
+  var range = {}
+  ,   range_adapter
+  ,   selection_adapter
+  ,   _range
+  ,   _selection
   ;
   
-  if (window.getSelection) {
-    selection = window.getSelection();
-    
-    if (selection.rangeCount) {
-      selection = selection.getRangeAt(0);
-    }
-
-  } else if (document.selection) {
-    selection = document.selection.createRange();
+  if (typeof rangy !== 'undefined') {
+    range_adapter = rangy;
+    selection_adapter = rangy;
+  } else {
+    range_adapter = document;
+    selection_adapter = window;
   }
   
-  range.is = function(el) {
-    return el.toLowerCase() === range.parentNode();
-  };
-  
-  range.parentNode = function() {
-    var container;
-    
-    if (selection) {
-      if (window.getSelection) {
-        container = selection.startContainer;
-        
-        if (container && container.nodeType === 3) {
-          container = container.parentNode;
-        }
-
-        return container && container.nodeName.toLowerCase();
-        
-      } else {
-        return selection.parentElement().nodeName.toLowerCase();
-      }
-    }
-  };
-  
-  range.restore = function(with_parent) {
-    if (window.getSelection) {
-      var sel = window.getSelection();
-      
-      context.focus();
-      
-      if (selection.collapsed) {
-        var shim = document.createTextNode('\00');
-        selection.insertNode(shim);
-        selection.selectNode(shim);
-        selection.collapse(false);
-      }
-      
-      sel.removeAllRanges();
-      sel.addRange(selection);
-
-      if (with_parent) {
-        var r = document.createRange();
-        var a = range.commonAncestor();
-        
-        if (a !== context) {
-          r.selectNode(a);
-          
-          sel.removeAllRanges();
-          sel.addRange(r);
-        }
-      }
-      
-    } else if (document.selection && selection.select) {
-      selection.select();
-    }
+  range.get = function() {
+    _selection = selection_adapter.getSelection();
+    _range = _selection.rangeCount && _selection.getRangeAt(0);
   };
   
   range.commonAncestor = function() {
-    var a;
-
-    if (window.getSelection) {
-      a = selection.commonAncestorContainer;
-      
-      if (a && a.nodeType === 3) {
-        a = a.parentNode;
-      }
-    } else if (document.selection) {
-      a = selection.parentElement();
-    }
-    
-    return a;
-  }
-  
-  range.selectNode = function(node) {
-    var r = document.createRange();
-    var sel = window.getSelection();
-    
-    sel.removeAllRanges();
-    r.selectNode(node);
-    sel.addRange(r);
+    return _range && _range.commonAncestorContainer;
   };
   
   range.moveToEnd = function(node) {
-    var range, sel;
+    var r = range_adapter.createRange();
     
-    if (document.createRange) {
-      range = document.createRange();
-      range.selectNodeContents(node);
-      range.collapse(false);
-      sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    } else if (document.selection) {
-      range = document.createTextRange();
-      range.moveToElementText(node);
-      range.collapse(false);
-      range.select();
-    }
+    _selection = selection_adapter.getSelection();
+    
+    r.selectNodeContents(node);
+    r.collapse(false);
+    _selection.setSingleRange(r);
   };
   
-  range.wrap = function(nodeName) {
-    var node;
+  range.selectNode = function(node) {
+    _range && _range.selectNode(node);
+  };
+  
+  range.surroundContents = function(node) {
+    if (!_range) return;
     
     try {
-      node = document.createElement(nodeName);
-      selection.surroundContents(node);
-      range.selectNode(node);
+      _range.surroundContents(node);
     } catch(e) {}
   };
   
-  range.insertHTML = function(str) {
-    if (selection && selection.pasteHTML) {
-      selection.pasteHTML(str);
-      
-    } else {
-      var el   = document.createElement("div")
-      ,   frag = document.createDocumentFragment()
-      ,   node
-      ,   lastNode
-      ;
-      
-      el.innerHTML = str;
-
-      while (node = el.firstChild) {
-        lastNode = frag.appendChild(node);
-      }
-      
-      selection.insertNode(frag);
-    }
-  };
+  range.insertNode = function(node) {
+    if (!_range) return;
+    
+    try {
+      _range.insertNode(node);
+    } catch(e) {}
+  }
   
   return range;
 }
