@@ -417,40 +417,36 @@ function fizzy_contentNode(node, content) {
     }
   };
       
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', makeRange);
-  element_addEventListener(node, 'keydown mousedown focus blur paste change', normalizeBlockFormat);
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(emit, 50));
+  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(makeRange, 50));
   element_addEventListener(node, 'paste', paste);
   
   function makeRange(e) {
     fizzywig.selection = rangy.getSelection();
-    console.log('orig selection: ')
-    console.dir(fizzywig.selection)
-    fizzywig.range = fizzywig.selection.rangeCount ? fizzywig.selection.getRangeAt(0) : rangy.createRange();
-    console.log('new selection: ')
-    console.dir(fizzywig.selection)
-    console.log('range: ')
-    console.dir(fizzywig.range)
+    fizzywig.range = fizzywig.selection.rangeCount && fizzywig.selection.getRangeAt(0);
+
+    normalizeBlockFormat(e);
   }
   
-  function normalizeBlockFormat(e) {
-    makeRange(e);
-    
+  function normalizeBlockFormat(e) {    
     // if we're backspacing and there's no text left, don't delete the block element
     if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       e.preventDefault();
-      node.innerHTML = '';
+      node.innerHTML = '<p><br></p>';
     }
     
     // cases where we want to format block
     // - no ancestor
     // - text ancestor with parent == node
     // - ancestor == div && ancestor parent == node
-    var ca = fizzywig.range.commonAncestorContainer;
     
-    if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
-      document.execCommand('formatBlock', false, '<p>');
-    }
+    try {
+      var ca = fizzywig.range.commonAncestorContainer;
+
+      if (!ca || ((ca.nodeType === 3 || ca.nodeName === 'DIV') && ca.parentNode === node)) {
+        document.execCommand('formatBlock', false, '<p>');
+      }
+    } catch(e) {}
   }
   
   function paste(e) {
@@ -461,6 +457,23 @@ function fizzy_contentNode(node, content) {
   
   function emit(e) {
     fizzywig.emitter.emit(e.type, [e]);
+  }
+  
+  function debounce(callback, delay) {
+    var timeout;
+
+    return function() {
+      var args = arguments
+      ,   self = this;
+
+      function exec() {
+        callback.apply(self, args);
+        timeout = null;
+      }
+
+      clearTimeout(timeout);
+      timeout = setTimeout(exec, delay);    
+    }
   }
   
   return content_node.enable();
@@ -718,7 +731,7 @@ ficb_proto.execute = function(e) {
     fizzywig.range.selectNode(n);
     document.execCommand('removeFormat', false, null);
     
-  } else if (fizzywig.range.canSurroundContents()) {
+  } else if (fizzywig.range && fizzywig.range.canSurroundContents()) {
     n = document.createElement(this.command);
     fizzywig.range.surroundContents(n);
   }
@@ -738,10 +751,11 @@ flb_proto.constructor = FizzyLinkButton;
 flb_proto.check = function() {
   var ac, active_command;
   
-  ac = fizzywig.range.commonAncestorContainer;
-  active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
-  
-  // was fizzywig.range.is('a')
+  try {
+    ac = fizzywig.range.commonAncestorContainer;
+    active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
+  } catch(e) {}
+    
   this.active = active_command;
   this.activate();
 };

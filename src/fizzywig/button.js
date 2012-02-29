@@ -250,7 +250,7 @@ ficb_proto.execute = function(e) {
     fizzywig.range.selectNode(n);
     document.execCommand('removeFormat', false, null);
     
-  } else if (fizzywig.range.canSurroundContents()) {
+  } else if (fizzywig.range && fizzywig.range.canSurroundContents()) {
     n = document.createElement(this.command);
     fizzywig.range.surroundContents(n);
   }
@@ -270,10 +270,11 @@ flb_proto.constructor = FizzyLinkButton;
 flb_proto.check = function() {
   var ac, active_command;
   
-  ac = fizzywig.range.commonAncestorContainer;
-  active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
-  
-  // was fizzywig.range.is('a')
+  try {
+    ac = fizzywig.range.commonAncestorContainer;
+    active_command = ac && ((ac.nodeType === 3 && ac.parentNode && ac.parentNode.nodeName === 'A') || (ac.nodeType === 1 && ac.nodeName === 'A'));
+  } catch(e) {}
+    
   this.active = active_command;
   this.activate();
 };
