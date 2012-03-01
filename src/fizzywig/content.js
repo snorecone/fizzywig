@@ -81,6 +81,8 @@ fizzywig.content = function(selector_or_node) {
       node.style.display = 'block';
       
       fizzywig.emitter.emit('sanitize:preview', [node]);
+      normalizeBlockFormat();
+      content.moveToEnd();
     } else {
       var val      = node.innerHTML.trim()
       ,   user_val = fizzywig.emitter.emit('sanitize:source', [val])
@@ -117,35 +119,37 @@ fizzywig.content = function(selector_or_node) {
     fizzywig.range.get();
     
     // if we're backspacing and there's no text left, don't delete the block element
-    if (e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
-      e.preventDefault();
+    if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
       node.innerHTML = '<p><br></p>';
+      fizzywig.range.selectNodeContents(node);
+      fizzywig.range.restore();
+      return;
     }
     
-    // cases where we want to format block
-    // - no ancestor
-    // - text ancestor with parent == node
-    // - ancestor == div && ancestor parent == node
-    
-    try {
-      var ca = fizzywig.range.commonAncestor()
-      ,   sc = fizzywig.range.startContainer()
-      ;
-
-      if (!ca || (ca === node && sc && sc.nodeType === 3)) {
-        document.execCommand('formatBlock', false, '<p>');
-        
-      } else {
-        while (ca !== node) {
-          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
-            document.execCommand('formatBlock', false, '<p>');
-          }
-          
-          ca = ca.parentNode;
-        } 
-      }
-      
-    } catch(e) {}
+    // // cases where we want to format block
+    // // - no ancestor
+    // // - text ancestor with parent == node
+    // // - ancestor == div && ancestor parent == node
+    // 
+    // try {
+    //   var ca = fizzywig.range.commonAncestor()
+    //   ,   sc = fizzywig.range.startContainer()
+    //   ;
+    // 
+    //   if (!ca || (ca === node && sc && sc.nodeType === 3)) {
+    //     document.execCommand('formatBlock', false, '<p>');
+    //     
+    //   } else {
+    //     while (ca !== node) {
+    //       if ((ca.parentNode === node) && (fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
+    //         document.execCommand('formatBlock', false, '<p>');
+    //       }
+    //       
+    //       ca = ca.parentNode;
+    //     } 
+    //   }
+    //   
+    // } catch(e) {}
   }
   
   function paste(e) {

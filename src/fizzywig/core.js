@@ -1,6 +1,6 @@
 fizzywig = {
   version: '0.0.1',
-  grouping: ['p', 'ul', 'ol', 'pre', 'blockquote'],
+  grouping: ['p', 'ul', 'ol', 'pre'],
   whitelist: [
     'a',
     'abbr',

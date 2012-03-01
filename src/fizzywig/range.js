@@ -21,6 +21,13 @@ function fizzy_range() {
     _range = _selection.rangeCount && _selection.getRangeAt(0);
   };
   
+  range.restore = function() {
+    if (!(_range && _selection)) return;
+    
+    _selection.removeAllRanges();
+    _selection.addRange(_range);
+  };
+  
   range.commonAncestor = function() {
     return _range && _range.commonAncestorContainer;
   };
@@ -37,6 +44,14 @@ function fizzy_range() {
   
   range.selectNode = function(node) {
     _range && _range.selectNode(node);
+  };
+  
+  range.selectNodeContents = function(node) {
+    _range && _range.selectNodeContents(node);
+  };
+  
+  range.extractContents = function(node) {
+    return _range && _range.extractContents(node);
   };
   
   range.surroundContents = function(node) {

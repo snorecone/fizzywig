@@ -200,12 +200,8 @@ fib_proto.execute = function(e) {
   // restore our range since we've lost focus
   this.restoreSelection();
   
-  if (['insertunorderedlist', 'insertorderedlist'].indexOf(this.command) !== -1) {
-    document.execCommand('formatBlock', false, '<p>');
-  }
-
   document.execCommand(this.command, false, null);
-
+  
   fizzywig.emitter.emit('click change');
 };
 
