@@ -4,10 +4,7 @@ var fizzywig;
 
 fizzywig = {
   version: '0.0.1',
-  block_elements: ['p', 'pre', 'Normal', 'Preformatted'],
-  inline_elements: ['b', 'i', 'strong', 'em', 'a', 'del', 'strike'],
-  void_elements: ['img', 'br', 'hr'],
-  first_children: ['p', 'ul', 'ol', 'pre'],
+  grouping: ['p', 'ul', 'ol', 'pre', 'blockquote'],
   whitelist: [
     'a',
     'abbr',
@@ -78,9 +75,7 @@ fizzywig = {
 
 // heading levels
 [1, 2, 3, 4, 5, 6].forEach(function(i) {
-  fizzywig.block_elements.push('Heading ' + i);
-  fizzywig.block_elements.push('h' + i);
-  fizzywig.first_children.push('h' + i);
+  fizzywig.grouping.push('h' + i);
 });
 
 fizzywig.emitter = fizzy_emitter();
@@ -286,7 +281,7 @@ fizzywig.content = function(selector_or_node) {
         
       } else {
         while (ca !== node) {
-          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.first_children.indexOf(ca.nodeName.toLowerCase()) === -1)) {
+          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
             document.execCommand('formatBlock', false, '<p>');
           }
           
@@ -387,22 +382,7 @@ function fizzy_toolbar(selector_or_node, content) {
   toolbar.content = function() {
     return content;
   };
-  
-  // fizzywig.emitter.on('focus', function() {
-  //   keepalive = true;
-  //   toolbar.enable();
-  // });
-  // 
-  // fizzywig.emitter.on('blur', function(e) {
-  //   keepalive = false;
-  //   
-  //   setTimeout(function() {
-  //     if (!keepalive) {
-  //       toolbar.disable();
-  //     }
-  //   }, 150);
-  // });
-  
+    
   fizzywig.emitter.on('click', function() {
     keepalive = true;
   });

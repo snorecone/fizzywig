@@ -137,7 +137,7 @@ fizzywig.content = function(selector_or_node) {
         
       } else {
         while (ca !== node) {
-          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.first_children.indexOf(ca.nodeName.toLowerCase()) === -1)) {
+          if ((ca.parentNode === node) && (ca.nodeType === 3 || fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
             document.execCommand('formatBlock', false, '<p>');
           }
           

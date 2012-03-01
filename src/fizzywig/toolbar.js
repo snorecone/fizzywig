@@ -39,22 +39,7 @@ function fizzy_toolbar(selector_or_node, content) {
   toolbar.content = function() {
     return content;
   };
-  
-  // fizzywig.emitter.on('focus', function() {
-  //   keepalive = true;
-  //   toolbar.enable();
-  // });
-  // 
-  // fizzywig.emitter.on('blur', function(e) {
-  //   keepalive = false;
-  //   
-  //   setTimeout(function() {
-  //     if (!keepalive) {
-  //       toolbar.disable();
-  //     }
-  //   }, 150);
-  // });
-  
+    
   fizzywig.emitter.on('click', function() {
     keepalive = true;
   });
