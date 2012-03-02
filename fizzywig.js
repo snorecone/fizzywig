@@ -4,7 +4,7 @@ var fizzywig;
 
 fizzywig = {
   version: '0.0.1',
-  grouping: ['p', 'ul', 'ol', 'pre'],
+  grouping: /^P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
   whitelist: [
     'a',
     'abbr',
@@ -72,11 +72,6 @@ fizzywig = {
     'var'
   ]
 };
-
-// heading levels
-[1, 2, 3, 4, 5, 6].forEach(function(i) {
-  fizzywig.grouping.push('h' + i);
-});
 
 fizzywig.emitter = fizzy_emitter();
 
@@ -269,31 +264,22 @@ fizzywig.content = function(selector_or_node) {
       fizzywig.range.restore();
       return;
     }
-    
-    // // cases where we want to format block
-    // // - no ancestor
-    // // - text ancestor with parent == node
-    // // - ancestor == div && ancestor parent == node
-    // 
-    // try {
-    //   var ca = fizzywig.range.commonAncestor()
-    //   ,   sc = fizzywig.range.startContainer()
-    //   ;
-    // 
-    //   if (!ca || (ca === node && sc && sc.nodeType === 3)) {
-    //     document.execCommand('formatBlock', false, '<p>');
-    //     
-    //   } else {
-    //     while (ca !== node) {
-    //       if ((ca.parentNode === node) && (fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
-    //         document.execCommand('formatBlock', false, '<p>');
-    //       }
-    //       
-    //       ca = ca.parentNode;
-    //     } 
-    //   }
-    //   
-    // } catch(e) {}
+        
+    try {
+      var children = Array.prototype.slice.apply(node.childNodes);
+      
+      children.forEach(function(child) {
+        if (child.nodeType === 3 && child.textContent.trim()) {
+          fizzywig.range.selectNode(child);
+          document.execCommand('formatBlock', false, '<p>');
+          
+        } else if (child.nodeType === 1 && !fizzywig.grouping.test(child.nodeName)) {
+          fizzywig.range.selectNode(child);
+          document.execCommand('formatBlock', false, '<p>');
+        }
+      });
+      
+    } catch(e) {}
   }
   
   function paste(e) {
@@ -420,6 +406,8 @@ function FizzyButton(node, command, value, prompt, toolbar) {
 FizzyButton.types = {
   'insertimage': FizzyVoidButton,
   'createlink': FizzyLinkButton,
+  'insertunorderedlist': FizzyListButton,
+  'insertorderedlist': FizzyListButton,
   'code': FizzyInlineCustomButton,
   '<pre>': FizzyHeadingButton,
   '<p>': FizzyNormalButton,
@@ -431,7 +419,7 @@ while (--i) {
   FizzyButton.types['<h' + i + '>'] = FizzyHeadingButton;
 }
 
-['insertunorderedlist', 'insertorderedlist', 'bold', 'italic', 'strikethrough', 'underline', 'indent', 'outdent'].forEach(function(f) {
+['bold', 'italic', 'strikethrough', 'underline', 'indent', 'outdent'].forEach(function(f) {
   FizzyButton.types[f] = FizzyInlineButton;
 });
 
@@ -562,11 +550,11 @@ fnb_proto.check = function() {
 
   try {
     active_value = document.queryCommandValue(this.command);
-    active_list = document.queryCommandState('insertunorderedlist') || document.queryCommandState('insertorderedlist');
+    // active_list = document.queryCommandState('insertunorderedlist') || document.queryCommandState('insertorderedlist');
   } catch (e) {}
 
   active_value = FizzyButton.normalizeCommandValue(active_value);
-  this.active = this.value === active_value || active_list;
+  this.active = this.value === active_value;
   this.activate();
 };
 
@@ -597,6 +585,63 @@ fib_proto.execute = function(e) {
   this.restoreSelection();
   
   document.execCommand(this.command, false, null);
+  
+  fizzywig.emitter.emit('click change');
+};
+
+
+
+function FizzyListButton() {
+  FizzyButton.apply(this, arguments);
+}
+
+var flib_proto = FizzyListButton.prototype = new FizzyButton();
+flib_proto.constructor = FizzyListButton;
+
+flib_proto.check = function() {
+  var active_command;
+
+  try {
+    active_command = document.queryCommandState(this.command);
+  } catch (e) {}
+
+  this.active = active_command;
+  this.activate();
+};
+
+flib_proto.execute = function(e) {
+  e.preventDefault();
+
+  // restore our range since we've lost focus
+  this.restoreSelection();
+  
+  document.execCommand(this.command, false, null);
+  
+  if (!this.active) {
+    fizzywig.range.get();
+
+    try {
+      ca = fizzywig.range.commonAncestor();
+      if (ca.nodeType === 3) ca = ca.parentNode;
+      
+      while (!(/^UL|OL$/.test(ca.nodeName))) {
+        ca = ca.parentNode;
+      }
+      
+      if (fizzywig.grouping.test(ca.parentNode.nodeName)) {
+        var parent = ca.parentNode
+        ,   frag
+        ;
+        
+        fizzywig.range.selectNode(ca);
+        frag = fizzywig.range.extractContents();
+        fizzywig.range.selectNode(parent);
+        fizzywig.range.insertNode(frag);
+        fizzywig.range.restore();
+      }
+      
+    } catch(e) {}
+  }
   
   fizzywig.emitter.emit('click change');
 };
@@ -775,6 +820,14 @@ function fizzy_range() {
     _range = _selection.rangeCount && _selection.getRangeAt(0);
   };
   
+  range.log = function() {
+    console.log(_range)
+  };
+  
+  range.refresh = function() {
+    _range && _range.refresh && _range.refresh();
+  };
+  
   range.restore = function() {
     if (!(_range && _selection)) return;
     
@@ -826,6 +879,10 @@ function fizzy_range() {
   
   range.startContainer = function() {
     return _range && _range.startContainer;
+  };
+  
+  range.endContainer = function() {
+    return _range && _range.endContainer;
   };
   
   return range;

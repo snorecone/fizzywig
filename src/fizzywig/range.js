@@ -21,6 +21,14 @@ function fizzy_range() {
     _range = _selection.rangeCount && _selection.getRangeAt(0);
   };
   
+  range.log = function() {
+    console.log(_range)
+  };
+  
+  range.refresh = function() {
+    _range && _range.refresh && _range.refresh();
+  };
+  
   range.restore = function() {
     if (!(_range && _selection)) return;
     
@@ -72,6 +80,10 @@ function fizzy_range() {
   
   range.startContainer = function() {
     return _range && _range.startContainer;
+  };
+  
+  range.endContainer = function() {
+    return _range && _range.endContainer;
   };
   
   return range;

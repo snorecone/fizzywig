@@ -125,31 +125,22 @@ fizzywig.content = function(selector_or_node) {
       fizzywig.range.restore();
       return;
     }
-    
-    // // cases where we want to format block
-    // // - no ancestor
-    // // - text ancestor with parent == node
-    // // - ancestor == div && ancestor parent == node
-    // 
-    // try {
-    //   var ca = fizzywig.range.commonAncestor()
-    //   ,   sc = fizzywig.range.startContainer()
-    //   ;
-    // 
-    //   if (!ca || (ca === node && sc && sc.nodeType === 3)) {
-    //     document.execCommand('formatBlock', false, '<p>');
-    //     
-    //   } else {
-    //     while (ca !== node) {
-    //       if ((ca.parentNode === node) && (fizzywig.grouping.indexOf(ca.nodeName.toLowerCase()) === -1)) {
-    //         document.execCommand('formatBlock', false, '<p>');
-    //       }
-    //       
-    //       ca = ca.parentNode;
-    //     } 
-    //   }
-    //   
-    // } catch(e) {}
+        
+    try {
+      var children = Array.prototype.slice.apply(node.childNodes);
+      
+      children.forEach(function(child) {
+        if (child.nodeType === 3 && child.textContent.trim()) {
+          fizzywig.range.selectNode(child);
+          document.execCommand('formatBlock', false, '<p>');
+          
+        } else if (child.nodeType === 1 && !fizzywig.grouping.test(child.nodeName)) {
+          fizzywig.range.selectNode(child);
+          document.execCommand('formatBlock', false, '<p>');
+        }
+      });
+      
+    } catch(e) {}
   }
   
   function paste(e) {

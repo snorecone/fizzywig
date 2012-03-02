@@ -1,6 +1,6 @@
 fizzywig = {
   version: '0.0.1',
-  grouping: ['p', 'ul', 'ol', 'pre'],
+  grouping: /^P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
   whitelist: [
     'a',
     'abbr',
@@ -68,9 +68,4 @@ fizzywig = {
     'var'
   ]
 };
-
-// heading levels
-[1, 2, 3, 4, 5, 6].forEach(function(i) {
-  fizzywig.grouping.push('h' + i);
-});
 
