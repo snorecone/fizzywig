@@ -99,10 +99,15 @@ fizzywig.content = function(selector_or_node) {
   };
   
   content.sanitize = function() {
-    if (content.isSourceMode()) {
-      node.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
+    if (content_node.isSourceMode()) {
+      textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');      
     } else {
-      textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');
+      var val, user_val;
+      val = node.innerHTML.trim();
+      user_val = fizzywig.emitter.emit('sanitize:source', [val]);
+      
+      node.innerHTML = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
+      fizzywig.emitter.emit('sanitize:preview', [node]);
     }
   };
     
@@ -145,7 +150,7 @@ fizzywig.content = function(selector_or_node) {
   
   function paste(e) {
     setTimeout(function() {
-      node.innerHTML = fizzywig.sanitizer(node.innerHTML, 'paste');
+      content.sanitize();
     }, 1);
   }
   

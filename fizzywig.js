@@ -238,10 +238,15 @@ fizzywig.content = function(selector_or_node) {
   };
   
   content.sanitize = function() {
-    if (content.isSourceMode()) {
-      node.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
+    if (content_node.isSourceMode()) {
+      textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');      
     } else {
-      textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');
+      var val, user_val;
+      val = node.innerHTML.trim();
+      user_val = fizzywig.emitter.emit('sanitize:source', [val]);
+      
+      node.innerHTML = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
+      fizzywig.emitter.emit('sanitize:preview', [node]);
     }
   };
     
@@ -284,7 +289,7 @@ fizzywig.content = function(selector_or_node) {
   
   function paste(e) {
     setTimeout(function() {
-      node.innerHTML = fizzywig.sanitizer(node.innerHTML, 'paste');
+      content.sanitize();
     }, 1);
   }
   
@@ -616,32 +621,6 @@ flib_proto.execute = function(e) {
   this.restoreSelection();
   
   document.execCommand(this.command, false, null);
-  
-  if (!this.active) {
-    fizzywig.range.get();
-
-    try {
-      ca = fizzywig.range.commonAncestor();
-      if (ca.nodeType === 3) ca = ca.parentNode;
-      
-      while (!(/^UL|OL$/.test(ca.nodeName))) {
-        ca = ca.parentNode;
-      }
-      
-      if (fizzywig.grouping.test(ca.parentNode.nodeName)) {
-        var parent = ca.parentNode
-        ,   frag
-        ;
-        
-        fizzywig.range.selectNode(ca);
-        frag = fizzywig.range.extractContents();
-        fizzywig.range.selectNode(parent);
-        fizzywig.range.insertNode(frag);
-        fizzywig.range.restore();
-      }
-      
-    } catch(e) {}
-  }
   
   fizzywig.emitter.emit('click change');
 };

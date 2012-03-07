@@ -6,8 +6,9 @@ var install_dir = process.env['INSTALL_DIR'];
 var watchdir = function(directory) {
   fs.readdir(directory, function(err, dir) {
     dir.forEach(function(f) {
+      if (f.match(/#/)) return;
       var file = directory + '/' + f;
-      
+
       fs.stat(file, function(err, fd) {
         if (fd.isFile()) {
           fs.watch(file, function() {
@@ -46,8 +47,8 @@ var watchdir = function(directory) {
         } else if (fd.isDirectory()) {
           watchdir(file);
         }
-      });
-    });
+      });}
+                            );
   });
 };
 
