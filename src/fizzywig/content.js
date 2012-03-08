@@ -122,7 +122,7 @@ fizzywig.content = function(selector_or_node) {
   content.on = fizzywig.emitter.on;
   
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
-  element_addEventListener(node, 'focus blur keydown mousedown paste change', debounce(normalizeBlockFormat, 50));
+  element_addEventListener(node, 'focus blur keydown mousedown paste change', normalizeBlockFormat);
   element_addEventListener(node, 'paste', paste);
   
   function normalizeBlockFormat(e) {    
@@ -138,6 +138,7 @@ fizzywig.content = function(selector_or_node) {
     
     if (fizzywig.os.lion && e.shiftKey && e.which === 13) {
       e.preventDefault();
+
       var ca = fizzywig.range.commonAncestor()
       ,   br
       ;
@@ -147,9 +148,9 @@ fizzywig.content = function(selector_or_node) {
       if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
         br = document.createTextNode("\n");
       } else {
-        br = document.createElement('br');
+        br = document.createElement("br");
       }
-
+      
       fizzywig.range.insertNode(br);
      }
         
