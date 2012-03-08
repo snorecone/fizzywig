@@ -150,6 +150,7 @@ fizzywig.content = function(selector_or_node) {
   ,   object_attr
   ,   pasting
   ,   textarea
+  ,   source_mode
   ;
   
   // clear events first
@@ -219,6 +220,7 @@ fizzywig.content = function(selector_or_node) {
   
   content.toggleSourceMode = function() {
     if (content.isSourceMode()) {
+      fizzywig.emitter.emit('toggle:preview');
       node.innerHTML = fizzywig.sanitizer(textarea.value.trim(), 'paste');
       textarea.style.display = 'none';
       node.style.display = 'block';
@@ -226,19 +228,22 @@ fizzywig.content = function(selector_or_node) {
       fizzywig.emitter.emit('sanitize:preview', [node]);
       normalizeBlockFormat();
       content.moveToEnd();
+      source_mode = false;
     } else {
       var val      = node.innerHTML.trim()
       ,   user_val = fizzywig.emitter.emit('sanitize:source', [val])
       ;
-            
-      textarea.value = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
+      
       node.style.display = 'none';
       textarea.style.display = 'block';
+      textarea.value = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
+      fizzywig.emitter.emit('toggle:source', [textarea]);
+      source_mode = true;
     }
   };
   
   content.isSourceMode = function() {
-    return textarea.style.display !== 'none'
+    return source_mode;
   };
   
   content.sanitize = function() {
