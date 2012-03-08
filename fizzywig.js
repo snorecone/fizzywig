@@ -321,6 +321,7 @@ fizzywig.content = function(selector_or_node) {
   }
   
   function emit(e) {
+    fizzywig.range.get();
     fizzywig.emitter.emit(e.type, [e]);
   }
   
