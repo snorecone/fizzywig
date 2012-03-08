@@ -4,7 +4,7 @@ var fizzywig;
 
 fizzywig = {
   version: '0.0.1',
-  grouping: /^P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
+  grouping: /^BR|P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
   whitelist: [
     'a',
     'abbr',
@@ -70,7 +70,11 @@ fizzywig = {
     'u',
     'ul',
     'var'
-  ]
+  ],
+  os: {
+    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1
+  }
+  
 };
 
 fizzywig.emitter = fizzy_emitter();
@@ -238,7 +242,7 @@ fizzywig.content = function(selector_or_node) {
   };
   
   content.sanitize = function() {
-    if (content_node.isSourceMode()) {
+    if (content.isSourceMode()) {
       textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');      
     } else {
       var val, user_val;
@@ -256,12 +260,12 @@ fizzywig.content = function(selector_or_node) {
   content.on = fizzywig.emitter.on;
   
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
+  element_addEventListener(node, 'focus blur keydown mousedown paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
   function normalizeBlockFormat(e) {    
     fizzywig.range.get();
-    
+
     // if we're backspacing and there's no text left, don't delete the block element
     if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
       node.innerHTML = '<p><br></p>';
@@ -269,6 +273,23 @@ fizzywig.content = function(selector_or_node) {
       fizzywig.range.restore();
       return;
     }
+    
+    if (fizzywig.os.lion && e.shiftKey && e.which === 13) {
+      e.preventDefault();
+      var ca = fizzywig.range.commonAncestor()
+      ,   br
+      ;
+      
+      if (ca && ca.nodeType === 3) ca = ca.parentNode;
+      
+      if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
+        br = document.createTextNode("\n");
+      } else {
+        br = document.createElement('br');
+      }
+
+      fizzywig.range.insertNode(br);
+     }
         
     try {
       var children = Array.prototype.slice.apply(node.childNodes);
@@ -853,6 +874,9 @@ function fizzy_range() {
     
     try {
       _range.insertNode(node);
+      _range.selectNode(node);
+      _range.collapse(false);
+      _selection.setSingleRange(_range);
     } catch(e) {}
   };
   

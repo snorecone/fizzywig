@@ -1,6 +1,6 @@
 fizzywig = {
   version: '0.0.1',
-  grouping: /^P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
+  grouping: /^BR|P|UL|OL|PRE|BLOCKQUOTE|H[1-6]$/,
   whitelist: [
     'a',
     'abbr',
@@ -66,6 +66,10 @@ fizzywig = {
     'u',
     'ul',
     'var'
-  ]
+  ],
+  os: {
+    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1
+  }
+  
 };
 

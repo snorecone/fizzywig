@@ -75,6 +75,9 @@ function fizzy_range() {
     
     try {
       _range.insertNode(node);
+      _range.selectNode(node);
+      _range.collapse(false);
+      _selection.setSingleRange(_range);
     } catch(e) {}
   };
   

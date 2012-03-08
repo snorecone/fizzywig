@@ -99,7 +99,7 @@ fizzywig.content = function(selector_or_node) {
   };
   
   content.sanitize = function() {
-    if (content_node.isSourceMode()) {
+    if (content.isSourceMode()) {
       textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');      
     } else {
       var val, user_val;
@@ -117,12 +117,12 @@ fizzywig.content = function(selector_or_node) {
   content.on = fizzywig.emitter.on;
   
   element_addEventListener(node, 'focus blur keyup mouseup paste change', emit);
-  element_addEventListener(node, 'focus blur keyup mouseup paste change', debounce(normalizeBlockFormat, 50));
+  element_addEventListener(node, 'focus blur keydown mousedown paste change', debounce(normalizeBlockFormat, 50));
   element_addEventListener(node, 'paste', paste);
   
   function normalizeBlockFormat(e) {    
     fizzywig.range.get();
-    
+
     // if we're backspacing and there's no text left, don't delete the block element
     if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
       node.innerHTML = '<p><br></p>';
@@ -130,6 +130,23 @@ fizzywig.content = function(selector_or_node) {
       fizzywig.range.restore();
       return;
     }
+    
+    if (fizzywig.os.lion && e.shiftKey && e.which === 13) {
+      e.preventDefault();
+      var ca = fizzywig.range.commonAncestor()
+      ,   br
+      ;
+      
+      if (ca && ca.nodeType === 3) ca = ca.parentNode;
+      
+      if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
+        br = document.createTextNode("\n");
+      } else {
+        br = document.createElement('br');
+      }
+
+      fizzywig.range.insertNode(br);
+     }
         
     try {
       var children = Array.prototype.slice.apply(node.childNodes);
