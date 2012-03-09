@@ -721,7 +721,14 @@ flb_proto.execute = function(e) {
     var return_vals = fizzywig.emitter.emit(this.prompt);
 
     if (return_vals[this.prompt]) {
-      document.execCommand(this.command, false, return_vals[this.prompt][0]);
+      if (fizzywig.range.collapsed()) {
+        var anchor = document.createElement('a');
+        anchor.innerHTML = return_vals[this.prompt][0];
+        anchor.setAttribute('href', return_vals[this.prompt][0]);
+        fizzywig.range.insertNode(anchor);
+      } else {
+        document.execCommand(this.command, false, return_vals[this.prompt][0]);
+      }
     }
   }
 
@@ -872,6 +879,10 @@ function fizzy_range() {
       _selection.setSingleRange(_range);
     } catch(e) {}
   };
+  
+  range.collapsed() = function() {
+    return _range && _range.collapsed;
+  }
   
   range.startContainer = function() {
     return _range && _range.startContainer;

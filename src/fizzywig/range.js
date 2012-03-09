@@ -81,6 +81,10 @@ function fizzy_range() {
     } catch(e) {}
   };
   
+  range.collapsed() = function() {
+    return _range && _range.collapsed;
+  }
+  
   range.startContainer = function() {
     return _range && _range.startContainer;
   };
