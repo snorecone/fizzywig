@@ -66,7 +66,7 @@ fizzywig.content = function(selector_or_node) {
     ;
     
     text_val = ((source_mode ? textarea.value : node.innerHTML) || '').trim();
-    text_val = fizzywig.sanitizer.sanitize(text_val, 'paste');
+    text_val = fizzywig.sanitizer(text_val, 'paste');
 
     object_tree[object_attr] = text_val;
 
