@@ -39,6 +39,7 @@ fizzywig = {
     'h6',
     'hr',
     'i',
+    'iframe',
     'img',
     'ins',
     'kbd',
@@ -203,21 +204,19 @@ fizzywig.content = function(selector_or_node) {
     fizzywig.range.moveToEnd(node);
   };
   
-  content.json = function() {
-    var object_tree = {};
-    object_tree[object_attr] = (node.innerHTML || '').trim();
+  content.json = function(callback) {
+    var object_tree = {}
+    ,   text_val
+    ;
     
+    text_val = ((source_mode ? textarea.value : node.innerHTML) || '').trim();
+    text_val = fizzywig.sanitizer.sanitize(text_val, 'paste');
+
+    object_tree[object_attr] = text_val;
+
     return object_tree;
   };
-  
-  content.tidy = function(callback) {
-    if (content.isSourceMode()) {
-      content.toggleSourceMode();
-    }
     
-    content.sanitize();
-  };
-  
   content.toggleSourceMode = function() {
     if (content.isSourceMode()) {
       fizzywig.emitter.emit('toggle:preview');
@@ -244,19 +243,6 @@ fizzywig.content = function(selector_or_node) {
   
   content.isSourceMode = function() {
     return source_mode;
-  };
-  
-  content.sanitize = function() {
-    if (content.isSourceMode()) {
-      textarea.value = fizzywig.sanitizer(textarea.value.trim(), 'paste');      
-    } else {
-      var val, user_val;
-      val = node.innerHTML.trim();
-      user_val = fizzywig.emitter.emit('sanitize:source', [val]);
-      
-      node.innerHTML = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
-      fizzywig.emitter.emit('sanitize:preview', [node]);
-    }
   };
     
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
@@ -316,7 +302,7 @@ fizzywig.content = function(selector_or_node) {
   
   function paste(e) {
     setTimeout(function() {
-      content.sanitize();
+      node.innerHTML = fizzywig.sanitizer.sanitize(node.innerHTML.trim(), 'paste');
     }, 1);
   }
   

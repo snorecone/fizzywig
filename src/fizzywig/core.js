@@ -35,6 +35,7 @@ fizzywig = {
     'h6',
     'hr',
     'i',
+    'iframe',
     'img',
     'ins',
     'kbd',
