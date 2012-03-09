@@ -302,7 +302,7 @@ fizzywig.content = function(selector_or_node) {
   
   function paste(e) {
     setTimeout(function() {
-      node.innerHTML = fizzywig.sanitizer.sanitize(node.innerHTML.trim(), 'paste');
+      node.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
     }, 1);
   }
   
