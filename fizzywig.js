@@ -255,7 +255,11 @@ fizzywig.content = function(selector_or_node) {
   element_addEventListener(node, 'paste', paste);
   
   function normalizeBlockFormat(e) {    
-    fizzywig.range.get();
+    var current_range = fizzywig.range.get()
+    ,   ca = fizzywig.range.commonAncestor()
+    ;
+
+    if (ca && ca.nodeType === 3) ca = ca.parentNode;
 
     // if we're backspacing and there's no text left, don't delete the block element
     if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
@@ -265,14 +269,10 @@ fizzywig.content = function(selector_or_node) {
       return;
     }
     
-    if (fizzywig.os.lion && e.shiftKey && e.which === 13) {
+    if (e && fizzywig.os.lion && e.shiftKey && e.which === 13) {
       e.preventDefault();
 
-      var ca = fizzywig.range.commonAncestor()
-      ,   br
-      ;
-      
-      if (ca && ca.nodeType === 3) ca = ca.parentNode;
+      var br;
       
       if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
         br = document.createTextNode("\n");
@@ -281,24 +281,20 @@ fizzywig.content = function(selector_or_node) {
       }
       
       fizzywig.range.insertNode(br);
+      fizzywig.range.selectNode(br);
+      fizzywig.range.collapse(false);
+      fizzywig.range.restore();
      }
         
     try {
-      var children = Array.prototype.slice.apply(node.childNodes);
-      
-      children.forEach(function(child) {
-        if (child.nodeType === 3 && child.textContent.trim()) {
-          fizzywig.range.selectNode(child);
-          fizzywig.range.restore();
-          document.execCommand('formatBlock', false, '<p>');
-          
-        } else if (child.nodeType === 1 && !fizzywig.grouping.test(child.nodeName)) {
-          fizzywig.range.selectNode(child);
-          fizzywig.range.restore();
-          document.execCommand('formatBlock', false, '<p>');
+      if (e && e.which === 13) {
+        if (ca.nodeType === 1 && 
+            !fizzywig.grouping.test(ca) &&
+            !document.queryCommandState('insertunorderedlist') &&
+            !document.queryCommandState('insertorderedlist')) {
+              document.execCommand('formatBlock', false, '<p>');
         }
-      });
-      
+      }     
     } catch(e) {}
   }
   
@@ -821,6 +817,7 @@ function fizzy_range() {
   range.get = function() {
     _selection = selection_adapter.getSelection();
     _range = _selection.rangeCount && _selection.getRangeAt(0);
+    return _range && _range.cloneRange();
   };
   
   range.log = function() {
@@ -831,9 +828,10 @@ function fizzy_range() {
     _range && _range.refresh && _range.refresh();
   };
   
-  range.restore = function() {
-    if (!(_range && _selection)) return;
+  range.restore = function(r) {
+    if (!((r || _range) && _selection)) return;
     
+    _range = r || _range;
     _selection.removeAllRanges();
     _selection.addRange(_range);
   };
@@ -847,7 +845,7 @@ function fizzy_range() {
     
     _selection = selection_adapter.getSelection();
     
-    r.selectNodeContents(node);
+    r.selectNodeContents(node.lastChild);
     r.collapse(false);
     _selection.setSingleRange(r);
   };
@@ -893,6 +891,10 @@ function fizzy_range() {
   
   range.endContainer = function() {
     return _range && _range.endContainer;
+  };
+
+  range.collapse = function(bool) {
+    _range && _range.collapse(bool);
   };
   
   return range;

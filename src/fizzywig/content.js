@@ -111,7 +111,11 @@ fizzywig.content = function(selector_or_node) {
   element_addEventListener(node, 'paste', paste);
   
   function normalizeBlockFormat(e) {    
-    fizzywig.range.get();
+    var current_range = fizzywig.range.get()
+    ,   ca = fizzywig.range.commonAncestor()
+    ;
+
+    if (ca && ca.nodeType === 3) ca = ca.parentNode;
 
     // if we're backspacing and there's no text left, don't delete the block element
     if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
@@ -121,14 +125,10 @@ fizzywig.content = function(selector_or_node) {
       return;
     }
     
-    if (fizzywig.os.lion && e.shiftKey && e.which === 13) {
+    if (e && fizzywig.os.lion && e.shiftKey && e.which === 13) {
       e.preventDefault();
 
-      var ca = fizzywig.range.commonAncestor()
-      ,   br
-      ;
-      
-      if (ca && ca.nodeType === 3) ca = ca.parentNode;
+      var br;
       
       if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
         br = document.createTextNode("\n");
@@ -137,24 +137,20 @@ fizzywig.content = function(selector_or_node) {
       }
       
       fizzywig.range.insertNode(br);
+      fizzywig.range.selectNode(br);
+      fizzywig.range.collapse(false);
+      fizzywig.range.restore();
      }
         
     try {
-      var children = Array.prototype.slice.apply(node.childNodes);
-      
-      children.forEach(function(child) {
-        if (child.nodeType === 3 && child.textContent.trim()) {
-          fizzywig.range.selectNode(child);
-          fizzywig.range.restore();
-          document.execCommand('formatBlock', false, '<p>');
-          
-        } else if (child.nodeType === 1 && !fizzywig.grouping.test(child.nodeName)) {
-          fizzywig.range.selectNode(child);
-          fizzywig.range.restore();
-          document.execCommand('formatBlock', false, '<p>');
+      if (e && e.which === 13) {
+        if (ca.nodeType === 1 && 
+            !fizzywig.grouping.test(ca) &&
+            !document.queryCommandState('insertunorderedlist') &&
+            !document.queryCommandState('insertorderedlist')) {
+              document.execCommand('formatBlock', false, '<p>');
         }
-      });
-      
+      }     
     } catch(e) {}
   }
   
