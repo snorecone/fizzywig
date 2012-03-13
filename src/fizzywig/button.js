@@ -277,6 +277,7 @@ ficb_proto.execute = function(e) {
     }
     
     fizzywig.range.selectNode(n);
+    fizzywig.range.restore();
     document.execCommand('removeFormat', false, null);
     
   } else {

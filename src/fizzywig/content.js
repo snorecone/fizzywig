@@ -145,10 +145,12 @@ fizzywig.content = function(selector_or_node) {
       children.forEach(function(child) {
         if (child.nodeType === 3 && child.textContent.trim()) {
           fizzywig.range.selectNode(child);
+          fizzywig.range.restore();
           document.execCommand('formatBlock', false, '<p>');
           
         } else if (child.nodeType === 1 && !fizzywig.grouping.test(child.nodeName)) {
           fizzywig.range.selectNode(child);
+          fizzywig.range.restore();
           document.execCommand('formatBlock', false, '<p>');
         }
       });
