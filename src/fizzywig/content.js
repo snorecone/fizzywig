@@ -145,7 +145,7 @@ fizzywig.content = function(selector_or_node) {
     try {
       if (e && e.which === 13) {
         if (ca.nodeType === 1 && 
-            !fizzywig.grouping.test(ca) &&
+            !fizzywig.grouping.test(ca.nodeName) &&
             !document.queryCommandState('insertunorderedlist') &&
             !document.queryCommandState('insertorderedlist')) {
               document.execCommand('formatBlock', false, '<p>');
