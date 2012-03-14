@@ -225,7 +225,6 @@ fizzywig.content = function(selector_or_node) {
       node.style.display = 'block';
       
       fizzywig.emitter.emit('sanitize:preview', [node]);
-      normalizeBlockFormat();
       content.moveToEnd();
       source_mode = false;
     } else {
@@ -262,7 +261,7 @@ fizzywig.content = function(selector_or_node) {
     if (ca && ca.nodeType === 3) ca = ca.parentNode;
 
     // if we're backspacing and there's no text left, don't delete the block element
-    if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
+    if (e && e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       node.innerHTML = '<p><br></p>';
       fizzywig.range.selectNodeContents(node);
       fizzywig.range.restore();
@@ -845,9 +844,11 @@ function fizzy_range() {
     
     _selection = selection_adapter.getSelection();
     
-    r.selectNodeContents(node.lastChild);
-    r.collapse(false);
-    _selection.setSingleRange(r);
+    try {
+      r.selectNodeContents(node.lastChild);
+      r.collapse(false);
+      _selection.setSingleRange(r);
+    } catch(e) {}
   };
   
   range.selectNode = function(node) {
@@ -901,7 +902,7 @@ function fizzy_range() {
 }
 
 fizzywig.sanitizer = function(html, policy) {
-  if (typeof html_sanitizer === 'undefined') return html;
+  if (true || typeof html_sanitizer === 'undefined') return html;
   return html_sanitizer.sanitizeWithPolicy(html, fizzywig.sanitizer.policies[policy]);
 };
 

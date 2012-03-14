@@ -47,9 +47,11 @@ function fizzy_range() {
     
     _selection = selection_adapter.getSelection();
     
-    r.selectNodeContents(node.lastChild);
-    r.collapse(false);
-    _selection.setSingleRange(r);
+    try {
+      r.selectNodeContents(node.lastChild);
+      r.collapse(false);
+      _selection.setSingleRange(r);
+    } catch(e) {}
   };
   
   range.selectNode = function(node) {

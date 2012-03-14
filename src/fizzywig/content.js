@@ -81,7 +81,6 @@ fizzywig.content = function(selector_or_node) {
       node.style.display = 'block';
       
       fizzywig.emitter.emit('sanitize:preview', [node]);
-      normalizeBlockFormat();
       content.moveToEnd();
       source_mode = false;
     } else {
@@ -118,7 +117,7 @@ fizzywig.content = function(selector_or_node) {
     if (ca && ca.nodeType === 3) ca = ca.parentNode;
 
     // if we're backspacing and there's no text left, don't delete the block element
-    if ((!e || e.which === 8) && !(node.innerText || node.textContent || '').trim()) {
+    if (e && e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
       node.innerHTML = '<p><br></p>';
       fizzywig.range.selectNodeContents(node);
       fizzywig.range.restore();
