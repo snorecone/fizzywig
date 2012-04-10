@@ -967,9 +967,12 @@
       sanitize: sanitize,
       sanitizeAttribs: sanitizeAttribs,
       sanitizeWithPolicy: sanitizeWithPolicy,
-      unescapeEntities: unescapeEntities
+      unescapeEntities: unescapeEntities,
+      URI_SCHEME_RE: URI_SCHEME_RE,
+      WHITELISTED_SCHEMES: WHITELISTED_SCHEMES
     };
   })();
 
   window.html_sanitizer = html;
+  window.html4 = html4;
 }(window));

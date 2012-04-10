@@ -66,7 +66,7 @@ fizzywig.content = function(selector_or_node) {
     ;
     
     text_val = ((source_mode ? textarea.value : node.innerHTML) || '').trim();
-    text_val = fizzywig.sanitizer(text_val, 'paste');
+    text_val = fizzywig.sanitizer(text_val, 'default');
 
     object_tree[object_attr] = text_val;
 
@@ -76,7 +76,7 @@ fizzywig.content = function(selector_or_node) {
   content.toggleSourceMode = function() {
     if (content.isSourceMode()) {
       fizzywig.emitter.emit('toggle:preview');
-      node.innerHTML = fizzywig.sanitizer(textarea.value.trim(), 'paste');
+      node.innerHTML = fizzywig.sanitizer(textarea.value.trim(), 'default');
       textarea.style.display = 'none';
       node.style.display = 'block';
       
@@ -90,7 +90,7 @@ fizzywig.content = function(selector_or_node) {
       
       node.style.display = 'none';
       textarea.style.display = 'block';
-      textarea.value = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'paste');
+      textarea.value = fizzywig.sanitizer((user_val['sanitize:source'] && user_val['sanitize:source'][0]) || val, 'default');
       fizzywig.emitter.emit('toggle:source', [textarea]);
       source_mode = true;
     }
@@ -153,9 +153,11 @@ fizzywig.content = function(selector_or_node) {
     } catch(e) {}
   }
   
-  function paste(e) {
+  function paste(e) {    
     setTimeout(function() {
       node.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
+      fizzywig.range.get();
+      fizzywig.range.restore();
     }, 1);
   }
   
