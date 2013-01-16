@@ -4,83 +4,81 @@
   <meta charset="utf-8">
   <title>fizzywig example</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="ugc.css">
+  <link rel="stylesheet" href="typeset.css">
   <script src="es5-shim.js"></script>
   <script src="../html-sanitizer.js"></script>
   <script src="../fizzywig.js"></script>
 </head>
 <body>
   <div id="wrap">
-    <div class="toolbar">
-      <form action="#" data-content-editor>
-        <ul>
-          <li><button data-content-editor-command="bold"><span>bold</span></button></li>
-          <li><button data-content-editor-command="italic"><span>italic</span></button></li>
-          <li><button data-content-editor-command="strikethrough"><span>strikethrough</span></button></li>
-          <li><button data-content-editor-command="underline"><span>underline</span></button></li>
-          <li><button data-content-editor-command="code"><span>code</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h1&gt;"><span>h1</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h2&gt;"><span>h2</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h3&gt;"><span>h3</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h4&gt;"><span>h4</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h5&gt;"><span>h5</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="&lt;h6&gt;"><span>h6</span></button></li>
-          <li><button data-content-editor-command="formatBlock" data-content-editor-value="<pre>"><span>&lt; &gt;</span></button></li>
-          <li><button data-content-editor-command="insertunorderedlist"><span>ul</span></button></li>
-          <li><button data-content-editor-command="insertorderedlist"><span>ol</span></button></li>
-          <li><button data-content-editor-command="insertimage" data-content-editor-prompt="image"><span>img</span></button></li>
-          <li><button data-content-editor-command="createlink" data-content-editor-prompt="link"><span>&lt;a&gt;</span></button></li>
+    <div class="editor">
+      <div data-content-editor class="contenteditor">
+        <ul class="toolbar">
+          <li class="tool">
+            <select class="selectbox small" title="Paragraph Format">
+              <option selected="" data-content-editor-command="formatBlock" data-content-editor-value="&lt;p&gt;">Normal</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;pre&gt;">Preformatted</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h1&gt;">Heading 1</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h2&gt;">Heading 2</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h3&gt;">Heading 3</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h4&gt;">Heading 4</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h5&gt;">Heading 5</option>
+              <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h6&gt;">Heading 6</option>
+            </select>
+          </li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="bold" title="Bold"><span class="fizzywig-bold">Bold</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="italic" title="Italic"><span class="fizzywig-italic">Italic</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="createlink" data-content-editor-prompt="insert-link" title="Insert Link"><span class="fizzywig-link">Insert Link</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="code" title="Code"><span class="fizzywig-code">Code</span></button></li>
+          <li class="toolbar-separator"></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="insertunorderedlist" title="Bulleted List"><span class="fizzywig-unordered-list">Bulleted List</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="insertorderedlist" title="Numbered List"><span class="fizzywig-ordered-list">Numbered List</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="outdent" title="Unindent"><span class="fizzywig-unindent">Unindent</span></button></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="indent" title=""><span class="fizzywig-indent">Indent</span></button></li>
+          <li class="toolbar-separator"></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="insertimage" data-content-editor-prompt="insert-media" title="Embed Image or Video"><span class="fizzywig-media">Embed Image or Video</span></button></li>
+          <li class="toolbar-separator"></li>
+          <li class="tool"><button class="toolbar-button" data-content-editor-command="togglehtml" title="Edit HTML"><span class="fizzywig-html">HTML</span></button></li>
         </ul>
-      </form>
+
+      </div>
+
+      <div class="typeset contenteditable" data-content-editable="post">
+        <h1>Hi Folks</h1>
+
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+          enim ad minim veniam, <em>quis</em> nostrud exercitation ullamco laboris
+          nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in <strong>voluptate</strong> velit esse cillum dolore eu fugiat
+          nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+          sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+      </div>
     </div>
-    
-    <div class="content ugc" data-content-editable="faq.answer_html">
-      <p>&#8203;</p>
-    </div>
-    
-    <div class="content ugc" data-content-editable="faq.question_html">
-      <h1>Hi Folks</h1>
-      
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-        enim ad minim veniam, <em>quis</em> nostrud exercitation ullamco laboris
-        nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-        reprehenderit in <strong>voluptate</strong> velit esse cillum dolore eu fugiat
-        nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-        sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </div>
-    
   </div>
   
   <script>
     // there can be many content areas, each emits a json object matching
     // its own [data-content-editable] attribute when saved.
     // you may select a group of these to control with one toolbar
-    var content = fizzywig.content('[data-content-editable^="faq"]'); 
+    var content = fizzywig.content('[data-content-editable]'); 
     
     // each content group may have only one toolbar
     content.toolbar('[data-content-editor]'); 
     
     // tie into the editor's save event here. saves every 1 second on a change event
-    content.on('save', function(data) { console.log(data.faq.answer_html) });
+    content.on('save', function(data) { console.log(data) });
     
     // define a prompt callback that returns a text value for a button command
-    content.prompt('image', function() {
-      return prompt('gimme image url');
+    content.on('insert-media', function() {
+      return prompt('gimme image url', 'http://');
     });
     
-    content.prompt('link', function() {
-      return prompt('gimme link url');
+    content.on('insert-link', function() {
+      return prompt('gimme link url', 'http://');
     });
-    
-    // var content = fizzywig('[data-content-editable="answer_html"]'); // there can be many contents
-    // content.toolbar('[data-content-editor"]'); // only one toolbar
-    // content.on('save', function() { do jquery ajax here});
-    // content.on('blur', function() { custom leaving stuff });
-    // content.on('focus', function() { custom leaving stuff });
-    // content.on('change', function() { custom leaving stuff });
   </script>
   
 </body>

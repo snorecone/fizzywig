@@ -1,7 +1,9 @@
-fizzywig
-========
+# fizzywig
 
-contentEditable wysiwyg editor 
---------
+A contentEditable wysiwyg editor.
 
-under development, not for production use, etc.
+This project is under development, and not for production use, etc.
+
+## Credits
+[jlong](https://github.com/jlong) for editor button styles
+[joshuarudd](https://github.com/joshuarudd) for [typeset.css](https://github.com/joshuarudd/typeset.css)
