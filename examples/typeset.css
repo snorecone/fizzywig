@@ -12,7 +12,7 @@
 */
 
 .typeset {
-  line-height: 1.0;
+  line-height: 1.0em;
   text-rendering: optimizeLegibility;
 }
 
@@ -43,7 +43,7 @@
   Initialize spacing and colors
 */
 
-.typeset li, .typeset dt, .typeset dd, .typeset p, .typeset pre, .typeset caption, .typeset th, .typeset td, .typeset figcaption {
+.typeset div, .typeset li, .typeset dt, .typeset dd, .typeset p, .typeset pre, .typeset caption, .typeset th, .typeset td, .typeset figcaption {
   line-height: 1.4;
 }
 .typeset caption, .typeset dl, .typeset dd, .typeset figcaption, .typeset figure, .typeset h1, .typeset h2, .typeset h3, .typeset h4, .typeset h5, .typeset h6, .typeset p, .typeset pre, .typeset table, .typeset ol, .typeset ul {

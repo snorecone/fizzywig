@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="typeset.css">
   <script src="es5-shim.js"></script>
   <script src="../html-sanitizer.js"></script>
+  <script src="../rangy-core.js"></script>
+  <script src="../rangy-selectionsaverestore.js"></script>
   <script src="../fizzywig.js"></script>
 </head>
 <body>
@@ -16,7 +18,7 @@
         <ul class="toolbar">
           <li class="tool">
             <select class="selectbox small" title="Paragraph Format">
-              <option selected="" data-content-editor-command="formatBlock" data-content-editor-value="&lt;p&gt;">Normal</option>
+              <option selected data-content-editor-command="formatBlock" data-content-editor-value="&lt;p&gt;">Normal</option>
               <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;pre&gt;">Preformatted</option>
               <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h1&gt;">Heading 1</option>
               <option data-content-editor-command="formatBlock" data-content-editor-value="&lt;h2&gt;">Heading 2</option>
@@ -43,19 +45,7 @@
 
       </div>
 
-      <div class="typeset contenteditable" data-content-editable="post">
-        <h1>Hi Folks</h1>
-
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-          enim ad minim veniam, <em>quis</em> nostrud exercitation ullamco laboris
-          nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in <strong>voluptate</strong> velit esse cillum dolore eu fugiat
-          nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-          sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </div>
+      <div class="typeset contenteditable" data-content-editable="post"><br></div>
     </div>
   </div>
   
@@ -69,7 +59,7 @@
     content.toolbar('[data-content-editor]'); 
     
     // tie into the editor's save event here. saves every 1 second on a change event
-    content.on('save', function(data) { console.log(data) });
+    content.on('save', function(data) { console.log(data.post) });
     
     // define a prompt callback that returns a text value for a button command
     content.on('insert-media', function() {

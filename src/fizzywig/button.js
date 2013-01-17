@@ -157,10 +157,10 @@ fhb_proto.execute = function(e) {
 
 // Headings can be options or buttons
 function FizzyNormalButton() {
-  FizzyHeadingButton.apply(this, arguments);
+  FizzyButton.apply(this, arguments);
 }
 
-var fnb_proto = FizzyNormalButton.prototype = new FizzyHeadingButton();
+var fnb_proto = FizzyNormalButton.prototype = new FizzyButton();
 fnb_proto.constructor = FizzyNormalButton;
 
 fnb_proto.check = function() {
@@ -168,14 +168,31 @@ fnb_proto.check = function() {
 
   try {
     active_value = document.queryCommandValue(this.command);
-    // active_list = document.queryCommandState('insertunorderedlist') || document.queryCommandState('insertorderedlist');
   } catch (e) {}
 
-  active_value = FizzyButton.normalizeCommandValue(active_value);
-  this.active = this.value === active_value;
+  this.active = !active_value;
   this.activate();
 };
 
+fnb_proto.execute = function(e) {
+  e.preventDefault();
+  var sel = rangy.getSelection();
+  var range = sel.getRangeAt(0);
+  var ca = range.commonAncestorContainer;
+  if (ca && ca.nodeType === 3) {
+    ca = ca.parentNode;
+    range.selectNode(ca);
+  }
+  if (ca && ca.nodeType === 1 && fizzywig.grouping.test(ca.nodeName)) {
+    while (ca.firstChild) {
+      range.insertNode(ca.firstChild);
+      if (ca.firstChild) ca.removeChild(ca.firstChild);
+    }
+    ca.parentNode.removeChild(ca);
+    range.collapse(false);
+    sel.setSingleRange(range);
+  }
+};
 
 
 function FizzyInlineButton() {

@@ -109,56 +109,104 @@ fizzywig.content = function(selector_or_node) {
   element_addEventListener(node, 'focus blur keydown mousedown paste change', normalizeBlockFormat);
   element_addEventListener(node, 'paste', paste);
   
-  function normalizeBlockFormat(e) {    
-    var current_range = fizzywig.range.get()
-    ,   ca = fizzywig.range.commonAncestor()
-    ;
-
+  function normalizeBlockFormat(e) {
+    var ca = fizzywig.range.commonAncestor();
     if (ca && ca.nodeType === 3) ca = ca.parentNode;
-
-    // if we're backspacing and there's no text left, don't delete the block element
-    if (e && e.which === 8 && !(node.innerText || node.textContent || '').trim()) {
-      node.innerHTML = '<p><br></p>';
-      fizzywig.range.selectNodeContents(node);
-      fizzywig.range.restore();
-      return;
+    
+    if (!node.lastChild || node.lastChild.nodeName !== 'BR') {
+      node.appendChild(document.createElement('br'));
     }
     
-    if (e && fizzywig.os.lion && e.shiftKey && e.which === 13) {
-      e.preventDefault();
-
-      var br;
-      
-      if (ca && ca.nodeType === 1 && ca.nodeName === 'PRE') {
-        br = document.createTextNode("\n");
-      } else {
-        br = document.createElement("br");
+    if (e && e.which === 13) {
+      if (!document.queryCommandState('insertunorderedlist') &&
+          !document.queryCommandState('insertorderedlist') &&
+          ca && ca.nodeType === 1 && /^(P|DIV)$/.test(ca.nodeName)) {
+            var br = document.createElement("br");
+            var sel = rangy.getSelection();
+            var range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(br);
+            range.collapseAfter(br);
+            sel.setSingleRange(range);
+            if (e.preventDefault) {
+              e.stopPropagation();
+              e.preventDefault();
+            } else {
+              e.returnValue = false;
+            }
+            return false;
       }
       
-      fizzywig.range.insertNode(br);
-      fizzywig.range.selectNode(br);
-      fizzywig.range.collapse(false);
-      fizzywig.range.restore();
-     }
-        
-    try {
-      if (e && e.which === 13) {
-        if (ca.nodeType === 1 && 
-            !fizzywig.grouping.test(ca.nodeName) &&
-            !document.queryCommandState('insertunorderedlist') &&
-            !document.queryCommandState('insertorderedlist')) {
-              document.execCommand('formatBlock', false, '<p>');
-        }
-      }     
-    } catch(e) {}
+      if (ca && ca.nodeType === 1 && /(H[1-6]|PRE)/.test(ca.nodeName)) {
+        setTimeout(function() {
+          var sel = rangy.getSelection();
+          var range = sel.getRangeAt(0);
+          if (range.commonAncestorContainer && range.commonAncestorContainer.nodeType === 1 && /^P|DIV$/.test(range.commonAncestorContainer.nodeName)) {
+            while (range.commonAncestorContainer.firstChild) {
+              range.insertNode(range.commonAncestorContainer.firstChild);
+              range.commonAncestorContainer.removeChild(range.commonAncestorContainer.firstChild);
+            }
+            range.commonAncestorContainer.parentNode.removeChild(range.commonAncestorContainer);
+            range.collapse(false);
+            sel.setSingleRange(range);
+            if (e.preventDefault) {
+              e.stopPropagation();
+              e.preventDefault();
+            } else {
+              e.returnValue = false;
+            }
+          }
+        }, 1);
+      }
+    }
   }
   
-  function paste(e) {    
-    setTimeout(function() {
-      node.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
-      fizzywig.range.get();
-      fizzywig.range.restore();
+  function paste(e) {
+    // Store selection
+    var savedSel = rangy.saveSelection();
+
+    // Remove and store the editable content
+    var frag = extractContent(node);
+
+    // Schedule the post-paste processing
+    window.setTimeout(function() {
+      // Get and sanitize pasted content
+      var div = document.createElement('div');
+      div.innerHTML = fizzywig.sanitizer(node.innerHTML.trim(), 'paste');
+      node.innerHTML = '';
+      var pastedFrag = extractContent(div);
+      
+      // Restore original DOM
+      node.appendChild(frag);
+
+      // Restore previous selection
+      var sel = rangy.getSelection();
+      rangy.restoreSelection(savedSel);
+
+      // Delete previous selection
+      sel.deleteFromDocument();
+      var lastNode = pastedFrag.lastChild;
+
+      // Insert pasted content
+      var range = sel.getRangeAt(0);
+      range.insertNode(pastedFrag);
+
+      // Move selection to after the pasted content
+      range.collapseAfter(lastNode);
+      rangy.getSelection().setSingleRange(range);
     }, 1);
+  }
+  
+  function extractContent(nod) {
+    var frag = document.createDocumentFragment()
+    ,   child
+    ;
+    
+    while (child = nod.firstChild) {
+      frag.appendChild(child);
+    }
+    
+    return frag;
   }
   
   function emit(e) {

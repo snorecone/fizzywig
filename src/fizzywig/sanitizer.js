@@ -15,7 +15,7 @@ fizzywig.sanitizer.policies.paste = function(tag_name, attributes) {
 fizzywig.sanitizer.policies.paste.uri = function(uri) { return uri };
 fizzywig.sanitizer.policies.paste.tokens = function(atype, val) {
   if (atype === html4.atype.STYLE) {
-    val = val.replace(/font:[^;]*;/, '');
+    return null
   }
   
   return val;
