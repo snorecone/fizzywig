@@ -128,7 +128,7 @@ fizzywig.content = function(selector_or_node) {
     var ca = fizzywig.range.commonAncestor();
     if (ca && ca.nodeType === 3) ca = ca.parentNode;
     
-    if (!node.lastChild || node.lastChild.nodeName !== 'BR') {
+    if (!fizzywig.os.ie && (!node.lastChild || node.lastChild.nodeName !== 'BR')) {
       node.appendChild(document.createElement('br'));
     }
     

@@ -69,7 +69,8 @@ fizzywig = {
     'var'
   ],
   os: {
-    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1
+    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1,
+    ie: navigator && navigator.userAgent && (/msie (\d+\.\d+);/i).test(navigator.userAgent)
   }
   
 };

@@ -73,7 +73,8 @@ fizzywig = {
     'var'
   ],
   os: {
-    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1
+    lion: navigator && navigator.userAgent && navigator.userAgent.indexOf('Mac OS X 10_7') !== -1,
+    ie: navigator && navigator.userAgent && (/msie (\d+\.\d+);/i).test(navigator.userAgent)
   }
   
 };
@@ -272,7 +273,7 @@ fizzywig.content = function(selector_or_node) {
     var ca = fizzywig.range.commonAncestor();
     if (ca && ca.nodeType === 3) ca = ca.parentNode;
     
-    if (!node.lastChild || node.lastChild.nodeName !== 'BR') {
+    if (!fizzywig.os.ie && (!node.lastChild || node.lastChild.nodeName !== 'BR')) {
       node.appendChild(document.createElement('br'));
     }
     
