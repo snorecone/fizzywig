@@ -96,8 +96,23 @@ fizzywig.content = function(selector_or_node) {
     }
   };
   
+  content.sanitize = function(rule) {
+    rule || (rule = 'default');
+    
+    if (content.isSourceMode()) {
+      textarea.value = fizzywig.sanitizer(textarea.value.trim(), rule);
+    } else {
+      node.innerHTML = fizzywig.sanitizer(node.innerHTML, rule);
+      content.focus();
+    }
+  };
+  
   content.isSourceMode = function() {
     return source_mode;
+  };
+  
+  content.node = function() {
+    return node;
   };
     
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);

@@ -370,7 +370,7 @@ fvb_proto.execute = function(e) {
     
   // restore our range since we've lost focus
   this.restoreSelection();  
-  fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
+  fizzywig.emitter.emit(this.prompt, [fizzywig.range, this.toolbar.content().node()]);
   fizzywig.emitter.emit('click change');
 };
 

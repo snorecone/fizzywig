@@ -240,8 +240,23 @@ fizzywig.content = function(selector_or_node) {
     }
   };
   
+  content.sanitize = function(rule) {
+    rule || (rule = 'default');
+    
+    if (content.isSourceMode()) {
+      textarea.value = fizzywig.sanitizer(textarea.value.trim(), rule);
+    } else {
+      node.innerHTML = fizzywig.sanitizer(node.innerHTML, rule);
+      content.focus();
+    }
+  };
+  
   content.isSourceMode = function() {
     return source_mode;
+  };
+  
+  content.node = function() {
+    return node;
   };
     
   fizzywig.emitter.on('keyup change blur paste', startSaveTimer);
@@ -818,7 +833,7 @@ fvb_proto.execute = function(e) {
     
   // restore our range since we've lost focus
   this.restoreSelection();  
-  fizzywig.emitter.emit(this.prompt, [fizzywig.range]);
+  fizzywig.emitter.emit(this.prompt, [fizzywig.range, this.toolbar.content().node()]);
   fizzywig.emitter.emit('click change');
 };
 
